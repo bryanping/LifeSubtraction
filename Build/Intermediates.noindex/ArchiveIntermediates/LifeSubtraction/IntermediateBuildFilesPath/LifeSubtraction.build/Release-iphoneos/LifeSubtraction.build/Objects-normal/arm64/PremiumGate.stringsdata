@@ -1,0 +1,32 @@
+{
+  "source": "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Views/PremiumGate.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "完整版功能",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 35
+        }
+      },
+      {
+        "comment": "",
+        "key": "解鎖後即可使用",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 37
+        }
+      },
+      {
+        "comment": "",
+        "key": "解鎖",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 40
+        }
+      }
+    ]
+  },
+  "version": 1
+}

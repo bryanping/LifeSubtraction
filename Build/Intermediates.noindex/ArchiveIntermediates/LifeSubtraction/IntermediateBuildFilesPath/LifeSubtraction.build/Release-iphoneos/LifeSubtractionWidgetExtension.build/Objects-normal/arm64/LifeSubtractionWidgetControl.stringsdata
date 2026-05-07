@@ -1,0 +1,40 @@
+{
+  "source": "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtractionWidget/LifeSubtractionWidgetControl.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "打開人生減法",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 21
+        }
+      },
+      {
+        "comment": "",
+        "key": "快速打開人生減法 App。",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 22
+        }
+      },
+      {
+        "comment": "",
+        "key": "人生減法",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 18
+        }
+      },
+      {
+        "comment": "",
+        "key": "打開人生減法",
+        "location": {
+          "startingColumn": 49,
+          "startingLine": 27
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'LifeSubtraction' in project 'LifeSubtraction'
+➜ Explicit dependency on target 'LifeSubtractionWidgetExtension' in project 'LifeSubtraction'
+Target 'LifeSubtractionWidgetExtension' in project 'LifeSubtraction' (no dependencies)

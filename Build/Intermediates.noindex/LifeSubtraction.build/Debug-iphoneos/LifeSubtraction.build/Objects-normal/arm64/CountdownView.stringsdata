@@ -1,0 +1,64 @@
+{
+  "source": "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Views/CountdownView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "倒數",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 26
+        }
+      },
+      {
+        "comment": "",
+        "key": "距離 %lld 歲還有",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 45
+        }
+      },
+      {
+        "comment": "",
+        "key": "天",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 51
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 89
+        }
+      },
+      {
+        "comment": "",
+        "key": "今天，你做了什麼讓未來的你感謝的事？",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 113
+        }
+      },
+      {
+        "comment": "",
+        "key": "今日反思",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 107
+        }
+      },
+      {
+        "comment": "",
+        "key": "已儲存今日反思",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 136
+        }
+      }
+    ]
+  },
+  "version": 1
+}

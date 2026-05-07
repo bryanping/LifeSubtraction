@@ -1,0 +1,189 @@
+{
+  "" : {
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtraction-primary.dia",
+    "emit-module-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtraction-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtraction-primary-emit-module.dia",
+    "pch" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtraction-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtraction-primary.swiftdeps"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/LifeSubtractionApp.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtractionApp.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtractionApp.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtractionApp.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtractionApp.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtractionApp.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtractionApp.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtractionApp.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeSubtractionApp~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Models/LifeStore.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeStore.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeStore.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeStore.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeStore.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeStore.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeStore.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeStore.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeStore~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Services/NotificationManager.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/NotificationManager.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/NotificationManager.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/NotificationManager.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/NotificationManager.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/NotificationManager.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/NotificationManager.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/NotificationManager.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/NotificationManager~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Services/StoreManager.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/StoreManager.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/StoreManager.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/StoreManager.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/StoreManager.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/StoreManager.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/StoreManager.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/StoreManager.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/StoreManager~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Shared/AppConstants.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/AppConstants.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/AppConstants.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/AppConstants.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/AppConstants.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/AppConstants.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/AppConstants.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/AppConstants.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/AppConstants~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Shared/LifeMetrics.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeMetrics.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeMetrics.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeMetrics.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeMetrics.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeMetrics.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeMetrics.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeMetrics.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeMetrics~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Shared/LifeTheme.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeTheme.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeTheme.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeTheme.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeTheme.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeTheme.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeTheme.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeTheme.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeTheme~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Shared/LifeWidgetProvider.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeWidgetProvider.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeWidgetProvider.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeWidgetProvider.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeWidgetProvider.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeWidgetProvider.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeWidgetProvider.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeWidgetProvider.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/LifeWidgetProvider~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Views/ContentView.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ContentView.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ContentView~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Views/CountdownView.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/CountdownView.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/CountdownView.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/CountdownView.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/CountdownView.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/CountdownView.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/CountdownView.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/CountdownView.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/CountdownView~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Views/OnboardingView.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OnboardingView.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OnboardingView.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OnboardingView.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OnboardingView.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OnboardingView.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OnboardingView.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OnboardingView.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OnboardingView~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Views/OverviewView.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OverviewView.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OverviewView.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OverviewView.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OverviewView.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OverviewView.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OverviewView.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OverviewView.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/OverviewView~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Views/PaywallView.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PaywallView.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PaywallView.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PaywallView.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PaywallView.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PaywallView.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PaywallView.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PaywallView.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PaywallView~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Views/PremiumGate.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PremiumGate.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PremiumGate.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PremiumGate.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PremiumGate.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PremiumGate.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PremiumGate.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PremiumGate.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/PremiumGate~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Views/SettingsView.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/SettingsView.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/SettingsView.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/SettingsView.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/SettingsView.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/SettingsView.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/SettingsView.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/SettingsView.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/SettingsView~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Views/ValuesView.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ValuesView.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ValuesView.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ValuesView.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ValuesView.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ValuesView.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ValuesView.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ValuesView.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/ValuesView~partial.swiftmodule"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Views/WeekGridView.swift" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/WeekGridView.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/WeekGridView.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/WeekGridView.dia",
+    "index-unit-output-path" : "/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/WeekGridView.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/WeekGridView.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/WeekGridView.o",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/WeekGridView.swiftdeps",
+    "swiftmodule" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/WeekGridView~partial.swiftmodule"
+  }
+}

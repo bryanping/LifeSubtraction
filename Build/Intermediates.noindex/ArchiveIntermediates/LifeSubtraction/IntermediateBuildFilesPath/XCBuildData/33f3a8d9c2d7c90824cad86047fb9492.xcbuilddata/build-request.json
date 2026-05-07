@@ -1,0 +1,81 @@
+{
+  "buildCommand" : {
+    "command" : "build",
+    "skipDependencies" : false,
+    "style" : "buildAndRun"
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "c2ec610076213c90c75a76c8d491f9fdea1a4e19f8ba58ccbfc3bddabde07489"
+    }
+  ],
+  "containerPath" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction.xcodeproj",
+  "continueBuildingAfterErrors" : false,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "install",
+    "activeArchitecture" : "undefined_arch",
+    "activeRunDestination" : {
+      "disableOnlyActiveArch" : true,
+      "platform" : "iphoneos",
+      "sdk" : "iphoneos26.2",
+      "sdkVariant" : "iphoneos",
+      "supportedArchitectures" : [
+        "armv4t",
+        "armv5",
+        "armv6",
+        "armv7",
+        "armv7f",
+        "armv7s",
+        "armv7k",
+        "arm64",
+        "arm64e"
+      ],
+      "targetArchitecture" : "undefined_arch"
+    },
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex",
+      "buildProductsPath" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Products",
+      "derivedDataPath" : "/Users/linping/Library/Developer/Xcode/DerivedData",
+      "indexDataStoreFolderPath" : "/Users/linping/Library/Developer/Xcode/DerivedData/LifeSubtraction-fzqoqpqjszpbwcgxfrsprwqyohqd/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/linping/Library/Developer/Xcode/DerivedData/LifeSubtraction-fzqoqpqjszpbwcgxfrsprwqyohqd/Index.noindex/PrecompiledHeaders",
+      "pchPath" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/PrecompiledHeaders"
+    },
+    "configurationName" : "Release",
+    "overrides" : {
+      "synthesized" : {
+        "table" : {
+          "ACTION" : "install",
+          "ASSET_PACK_FOLDER_PATH" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/InstallationBuildProductsLocation/OnDemandResources",
+          "ASSETCATALOG_COMPILER_FLATTENED_APP_ICON_PATH" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/BuildProductsPath/ProductIcon.png",
+          "DEPLOYMENT_LOCATION" : "YES",
+          "DEPLOYMENT_POSTPROCESSING" : "YES",
+          "DSTROOT" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/InstallationBuildProductsLocation",
+          "EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE" : "NO",
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_SIGNATURE_AGGREGATION" : "YES",
+          "ENABLE_XOJIT_PREVIEWS" : "YES",
+          "INDEX_ENABLE_DATA_STORE" : "NO",
+          "MESSAGES_APPLICATION_EXTENSION_SUPPORT_FOLDER_PATH" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/BuildProductsPath/MessagesApplicationExtensionSupport",
+          "MESSAGES_APPLICATION_SUPPORT_FOLDER_PATH" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/BuildProductsPath/MessagesApplicationSupport",
+          "OBJROOT" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath",
+          "ONLY_ACTIVE_ARCH" : "YES",
+          "SHARED_PRECOMPS_DIR" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/PrecompiledHeaders",
+          "SIGNATURE_METADATA_FOLDER_PATH" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/BuildProductsPath/Signatures",
+          "SWIFT_STDLIB_TOOL_UNSIGNED_DESTINATION_DIR" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/BuildProductsPath/SwiftSupport",
+          "SYMROOT" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/BuildProductsPath",
+          "WATCHKIT_2_SUPPORT_FOLDER_PATH" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/BuildProductsPath/WatchKitSupport2"
+        }
+      }
+    }
+  },
+  "schemeCommand" : "archive",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : false,
+  "useImplicitDependencies" : true,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : true
+}

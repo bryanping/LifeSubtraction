@@ -1,17 +1,16 @@
-//
-//  LifeSubtractionApp.swift
-//  LifeSubtraction
-//
-//  Created by 林平 on 2026/5/7.
-//
-
 import SwiftUI
 
 @main
 struct LifeSubtractionApp: App {
+    @StateObject private var store = LifeStore()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(store)
+                .onAppear {
+                    NotificationManager.shared.requestPermission()
+                }
         }
     }
 }

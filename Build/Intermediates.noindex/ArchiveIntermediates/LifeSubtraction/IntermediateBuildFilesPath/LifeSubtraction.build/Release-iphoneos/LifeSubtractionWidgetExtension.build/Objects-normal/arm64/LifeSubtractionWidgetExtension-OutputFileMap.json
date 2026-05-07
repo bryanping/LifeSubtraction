@@ -1,0 +1,46 @@
+{
+  "" : {
+    "const-values" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetExtension-primary.swiftconstvalues",
+    "dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetExtension-primary.d",
+    "diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetExtension-primary.dia",
+    "emit-module-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetExtension-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetExtension-primary-emit-module.dia",
+    "pch" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetExtension-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetExtension-primary.swiftdeps"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "index-unit-output-path" : "/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/GeneratedAssetSymbols.o"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtractionWidget/LifeProgressWidget.swift" : {
+    "index-unit-output-path" : "/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeProgressWidget.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeProgressWidget.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeProgressWidget.o"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtractionWidget/LifeSubtractionWidget.swift" : {
+    "index-unit-output-path" : "/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidget.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidget.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidget.o"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtractionWidget/LifeSubtractionWidgetBundle.swift" : {
+    "index-unit-output-path" : "/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetBundle.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetBundle.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetBundle.o"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtractionWidget/LifeSubtractionWidgetControl.swift" : {
+    "index-unit-output-path" : "/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetControl.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetControl.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetControl.o"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtractionWidget/LifeSubtractionWidgetLiveActivity.swift" : {
+    "index-unit-output-path" : "/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetLiveActivity.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetLiveActivity.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/LifeSubtractionWidgetLiveActivity.o"
+  },
+  "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtractionWidget/WidgetShared.swift" : {
+    "index-unit-output-path" : "/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/WidgetShared.o",
+    "llvm-bc" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/WidgetShared.bc",
+    "object" : "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/Build/Intermediates.noindex/ArchiveIntermediates/LifeSubtraction/IntermediateBuildFilesPath/LifeSubtraction.build/Release-iphoneos/LifeSubtractionWidgetExtension.build/Objects-normal/arm64/WidgetShared.o"
+  }
+}

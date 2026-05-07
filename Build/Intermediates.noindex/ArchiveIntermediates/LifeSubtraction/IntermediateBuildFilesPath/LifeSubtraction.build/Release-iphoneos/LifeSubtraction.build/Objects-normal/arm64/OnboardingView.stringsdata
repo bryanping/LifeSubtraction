@@ -1,0 +1,80 @@
+{
+  "source": "/Users/linping/Desktop/活動歷/App項目文檔/LifeSubtraction/LifeSubtraction/Views/OnboardingView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "開始我的人生減法",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 42
+        }
+      },
+      {
+        "comment": "",
+        "key": "繼續",
+        "location": {
+          "startingColumn": 67,
+          "startingLine": 42
+        }
+      },
+      {
+        "comment": "",
+        "key": "人生減法",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 68
+        }
+      },
+      {
+        "comment": "",
+        "key": "每一天都是珍貴的。\n當你看見剩餘的時間，\n才能真正決定什麼值得。",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 70
+        }
+      },
+      {
+        "comment": "",
+        "key": "你的生日是？",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 81
+        }
+      },
+      {
+        "comment": "",
+        "key": "",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 83
+        }
+      },
+      {
+        "comment": "",
+        "key": "預計壽命",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 98
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld 歲",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 100
+        }
+      },
+      {
+        "comment": "",
+        "key": "台灣平均壽命約 80 歲，健康生活可達 85-90 歲",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 109
+        }
+      }
+    ]
+  },
+  "version": 1
+}

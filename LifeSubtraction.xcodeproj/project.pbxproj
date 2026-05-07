@@ -6,9 +6,50 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A2B7A5412FAC50D60088B1D7 /* LifeSubtractionWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A2B7A52F2FAC50D40088B1D7 /* LifeSubtractionWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A2B7A53F2FAC50D60088B1D7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A2B7A22B2FAC2C570088B1D7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A2B7A52E2FAC50D40088B1D7;
+			remoteInfo = LifeSubtractionWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A2B7A5462FAC50D60088B1D7 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A2B7A5412FAC50D60088B1D7 /* LifeSubtractionWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		A2B7A2332FAC2C570088B1D7 /* LifeSubtraction.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LifeSubtraction.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2B7A52F2FAC50D40088B1D7 /* LifeSubtractionWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LifeSubtractionWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2B7A5542FAC51260088B1D7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		A2B7A5562FAC51260088B1D7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A2B7A5B82FACC2EF0088B1D7 /* Exceptions for "LifeSubtractionWidget" folder in "LifeSubtractionWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A2B7A52E2FAC50D40088B1D7 /* LifeSubtractionWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A2B7A2352FAC2C570088B1D7 /* LifeSubtraction */ = {
@@ -16,10 +57,25 @@
 			path = LifeSubtraction;
 			sourceTree = "<group>";
 		};
+		A2B7A5582FAC51260088B1D7 /* LifeSubtractionWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A2B7A5B82FACC2EF0088B1D7 /* Exceptions for "LifeSubtractionWidget" folder in "LifeSubtractionWidgetExtension" target */,
+			);
+			path = LifeSubtractionWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		A2B7A2302FAC2C570088B1D7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A2B7A52C2FAC50D40088B1D7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +89,8 @@
 			isa = PBXGroup;
 			children = (
 				A2B7A2352FAC2C570088B1D7 /* LifeSubtraction */,
+				A2B7A5582FAC51260088B1D7 /* LifeSubtractionWidget */,
+				A2B7A5532FAC51260088B1D7 /* Frameworks */,
 				A2B7A2342FAC2C570088B1D7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,8 +99,18 @@
 			isa = PBXGroup;
 			children = (
 				A2B7A2332FAC2C570088B1D7 /* LifeSubtraction.app */,
+				A2B7A52F2FAC50D40088B1D7 /* LifeSubtractionWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A2B7A5532FAC51260088B1D7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A2B7A5542FAC51260088B1D7 /* WidgetKit.framework */,
+				A2B7A5562FAC51260088B1D7 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -55,10 +123,12 @@
 				A2B7A22F2FAC2C570088B1D7 /* Sources */,
 				A2B7A2302FAC2C570088B1D7 /* Frameworks */,
 				A2B7A2312FAC2C570088B1D7 /* Resources */,
+				A2B7A5462FAC50D60088B1D7 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A2B7A5402FAC50D60088B1D7 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				A2B7A2352FAC2C570088B1D7 /* LifeSubtraction */,
@@ -69,6 +139,28 @@
 			productName = LifeSubtraction;
 			productReference = A2B7A2332FAC2C570088B1D7 /* LifeSubtraction.app */;
 			productType = "com.apple.product-type.application";
+		};
+		A2B7A52E2FAC50D40088B1D7 /* LifeSubtractionWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A2B7A5432FAC50D60088B1D7 /* Build configuration list for PBXNativeTarget "LifeSubtractionWidgetExtension" */;
+			buildPhases = (
+				A2B7A52B2FAC50D40088B1D7 /* Sources */,
+				A2B7A52C2FAC50D40088B1D7 /* Frameworks */,
+				A2B7A52D2FAC50D40088B1D7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A2B7A5582FAC51260088B1D7 /* LifeSubtractionWidget */,
+			);
+			name = LifeSubtractionWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = LifeSubtractionWidgetExtension;
+			productReference = A2B7A52F2FAC50D40088B1D7 /* LifeSubtractionWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -81,6 +173,9 @@
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					A2B7A2322FAC2C570088B1D7 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					A2B7A52E2FAC50D40088B1D7 = {
 						CreatedOnToolsVersion = 26.2;
 					};
 				};
@@ -100,12 +195,20 @@
 			projectRoot = "";
 			targets = (
 				A2B7A2322FAC2C570088B1D7 /* LifeSubtraction */,
+				A2B7A52E2FAC50D40088B1D7 /* LifeSubtractionWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		A2B7A2312FAC2C570088B1D7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A2B7A52D2FAC50D40088B1D7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +225,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A2B7A52B2FAC50D40088B1D7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A2B7A5402FAC50D60088B1D7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A2B7A52E2FAC50D40088B1D7 /* LifeSubtractionWidgetExtension */;
+			targetProxy = A2B7A53F2FAC50D60088B1D7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		A2B7A23C2FAC2C5A0088B1D7 /* Debug */ = {
@@ -269,12 +387,16 @@
 				PRODUCT_BUNDLE_IDENTIFIER = LifeSubtraction.bryanping.app.LifeSubtraction;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -301,12 +423,100 @@
 				PRODUCT_BUNDLE_IDENTIFIER = LifeSubtraction.bryanping.app.LifeSubtraction;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		A2B7A5442FAC50D60088B1D7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K6N38A5JS6;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LifeSubtractionWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LifeSubtractionWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = LifeSubtraction.bryanping.app.LifeSubtraction.LifeSubtractionWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		A2B7A5452FAC50D60088B1D7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K6N38A5JS6;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LifeSubtractionWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LifeSubtractionWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = LifeSubtraction.bryanping.app.LifeSubtraction.LifeSubtractionWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
 		};
@@ -327,6 +537,15 @@
 			buildConfigurations = (
 				A2B7A23F2FAC2C5A0088B1D7 /* Debug */,
 				A2B7A2402FAC2C5A0088B1D7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A2B7A5432FAC50D60088B1D7 /* Build configuration list for PBXNativeTarget "LifeSubtractionWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A2B7A5442FAC50D60088B1D7 /* Debug */,
+				A2B7A5452FAC50D60088B1D7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
