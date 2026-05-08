@@ -40,10 +40,6 @@ struct ContentView: View {
                     ValuesView()
                         .premiumGate()
                         .tabItem { Label("價值觀", systemImage: "heart.fill") }
-                    // 修改内容 — 家人系統 Tab（免費可用 1 位，付費無限制）
-                    FamilyView()
-                        .environmentObject(storeManager)
-                        .tabItem { Label("家人", systemImage: "person.2.fill") }
                     SettingsView()
                         .tabItem { Label("設定", systemImage: "gearshape.fill") }
                 }

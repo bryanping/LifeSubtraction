@@ -19,6 +19,8 @@ enum AppConstants {
         // 修改内容 — 家人系統
         static let familyMembers = "family-members"
         static let familyMomentRecords = "family-moment-records"
+        // 修改内容 — 你還有幾次（動態項目）
+        static let remainingMoments = "remaining-moments"
     }
 }
 

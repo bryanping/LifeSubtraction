@@ -6,6 +6,8 @@ struct SettingsView: View {
     @EnvironmentObject var storeManager: StoreManager
     @State private var showPaywall = false
     @State private var showResetAlert = false
+    // 修改内容 — 家人管理入口
+    @State private var showFamilyManagement = false
 
     var body: some View {
         NavigationView {
@@ -13,6 +15,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(spacing: 18) {
                     profileSection
+                    familySection
                     subscriptionSection
                     notificationSection
                     aboutSection
@@ -29,6 +32,9 @@ struct SettingsView: View {
             .toolbarBackground(.hidden, for: .navigationBar)               // // modified
             .sheet(isPresented: $showPaywall) {
                 PaywallView().environmentObject(storeManager)
+            }
+            .sheet(isPresented: $showFamilyManagement) {
+                FamilyView().environmentObject(storeManager)
             }
             .alert("確定重置？", isPresented: $showResetAlert) {
                 Button("重置", role: .destructive) {
@@ -77,6 +83,42 @@ struct SettingsView: View {
                 )
                 .padding(.horizontal, 16).padding(.vertical, 14)
                 .foregroundStyle(LifeTheme.textPrimary)                    // // modified
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(LifeTheme.glassFill)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(LifeTheme.glassBorder, lineWidth: 0.5)
+            )
+        }
+    }
+
+    // MARK: - 家人管理  // 修改内容
+
+    var familySection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            sectionHeader("重要的人")
+            VStack(spacing: 0) {
+                Button {
+                    showFamilyManagement = true
+                } label: {
+                    HStack {
+                        Image(systemName: "person.2.fill")
+                            .foregroundStyle(LifeTheme.accent)
+                            .frame(width: 20)
+                        Text("管理家人")
+                            .foregroundStyle(LifeTheme.textPrimary)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                            .foregroundStyle(LifeTheme.textTertiary)
+                    }
+                    .padding(.horizontal, 16).padding(.vertical, 14)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
             }
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)

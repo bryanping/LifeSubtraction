@@ -1,7 +1,8 @@
 import SwiftUI
 
-// 修改内容 — 家人系統主頁
+// 修改内容 — 家人管理 Sheet（從設定頁進入，不再是 Tab）
 struct FamilyView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var storeManager: StoreManager
 
     @State private var members: [FamilyMember] = []
@@ -13,19 +14,27 @@ struct FamilyView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 18) {
+                VStack(spacing: 14) {
                     introCard
                         .padding(.horizontal)
-                    memberList
+
+                    memberListSection
                         .padding(.horizontal)
+                        .padding(.bottom, 24)
                 }
                 .padding(.vertical, 8)
             }
             .background(LifeTheme.subtleBackground.ignoresSafeArea())
-            .navigationTitle("家人")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("管理家人")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(LifeTheme.textTertiary)
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button { handleAddMember() } label: {
                         Image(systemName: "plus.circle.fill")
@@ -39,64 +48,56 @@ struct FamilyView: View {
                     members.append(member)
                     saveMembers()
                 }
-                .environmentObject(storeManager)
             }
             .sheet(isPresented: $showingPaywall) {
-                FamilyPaywallView()
-                    .environmentObject(storeManager)
+                FamilyPaywallView().environmentObject(storeManager)
             }
         }
     }
 
     // 修改内容 — 說明卡
     var introCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Image(systemName: "heart.text.square.fill")
+                Image(systemName: "person.2.fill")
                     .foregroundStyle(LifeTheme.accent)
-                Text("你們共同剩下的時間")
+                Text("重要的人")
                     .font(.headline)
                     .foregroundStyle(LifeTheme.textPrimary)
             }
-            Text("這不是你的剩餘時間，而是你和重要的人還能一起擁有的時間。")
-                .font(.subheadline)
+            Text("在「你還有幾次？」新增項目時，可關聯這裡的家人，計算你們共同剩下的時間。")
+                .font(.caption)
                 .foregroundStyle(LifeTheme.textSecondary)
+
+            if !storeManager.isPremium {
+                HStack(spacing: 6) {
+                    Image(systemName: "lock.fill")
+                        .font(.caption2)
+                        .foregroundStyle(LifeTheme.warm)
+                    Text("免費版最多 1 位。升級後無限制。")
+                        .font(.caption2)
+                        .foregroundStyle(LifeTheme.textTertiary)
+                }
+                .padding(.top, 2)
+            }
         }
         .cardStyle()
     }
 
     // 修改内容 — 家人列表
-    var memberList: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("家人資料")
-                    .font(.headline)
-                    .foregroundStyle(LifeTheme.textPrimary)
-                Spacer()
-                if !storeManager.isPremium {
-                    Text("免費 1 位")
-                        .font(.caption2)
-                        .foregroundStyle(LifeTheme.textSecondary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Capsule().fill(Color.white.opacity(0.06)))
-                }
-            }
-
+    var memberListSection: some View {
+        VStack(spacing: 0) {
             if activeMembers.isEmpty {
                 emptyState
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(activeMembers.enumerated()), id: \.element.id) { index, member in
-                        NavigationLink {
-                            FamilyMemberDetailView(member: member)
-                        } label: {
-                            familyMemberRow(member)
-                        }
-                        .buttonStyle(.plain)
-
+                        memberRow(member)
                         if index < activeMembers.count - 1 {
-                            divider
+                            Rectangle()
+                                .fill(Color.white.opacity(0.06))
+                                .frame(height: 0.5)
+                                .padding(.leading, 56)
                         }
                     }
                 }
@@ -117,11 +118,11 @@ struct FamilyView: View {
             Image(systemName: "person.2.fill")
                 .font(.largeTitle)
                 .foregroundStyle(LifeTheme.accent)
-            Text("新增第一位重要的人")
-                .font(.headline)
-                .foregroundStyle(LifeTheme.textPrimary)
-            Text("開始計算你們還有多少次見面、通話、旅行與陪伴。")
+            Text("還沒有家人資料")
                 .font(.subheadline)
+                .foregroundStyle(LifeTheme.textPrimary)
+            Text("新增後，可在「你還有幾次？」項目中關聯。")
+                .font(.caption)
                 .foregroundStyle(LifeTheme.textSecondary)
                 .multilineTextAlignment(.center)
             PrimaryButton("新增家人", icon: "plus") {
@@ -133,13 +134,14 @@ struct FamilyView: View {
         .cardStyle()
     }
 
-    func familyMemberRow(_ member: FamilyMember) -> some View {
+    func memberRow(_ member: FamilyMember) -> some View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
                     .fill(LifeTheme.accentSoft)
-                    .frame(width: 40, height: 40)
+                    .frame(width: 38, height: 38)
                 Image(systemName: member.relation.iconName)
+                    .font(.subheadline)
                     .foregroundStyle(LifeTheme.accent)
             }
 
@@ -147,37 +149,24 @@ struct FamilyView: View {
                 Text(member.name)
                     .font(.subheadline)
                     .foregroundStyle(LifeTheme.textPrimary)
-                Text("\(member.relation.displayName) · \(member.currentAge) 歲")
+                Text("\(member.relation.displayName) · \(member.currentAge) 歲 · 剩 \(member.yearsRemaining) 年")
                     .font(.caption2)
                     .foregroundStyle(LifeTheme.textTertiary)
             }
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("\(member.yearsRemaining)")
-                    .font(.system(.subheadline, design: .rounded))
-                    .fontWeight(.semibold)
-                    .foregroundStyle(LifeTheme.textPrimary)
-                Text("年")
-                    .font(.caption2)
-                    .foregroundStyle(LifeTheme.textSecondary)
+            Button {
+                archiveMember(member)
+            } label: {
+                Image(systemName: "trash")
+                    .font(.caption)
+                    .foregroundStyle(Color.red.opacity(0.7))
             }
-
-            Image(systemName: "chevron.right")
-                .font(.caption2)
-                .foregroundStyle(LifeTheme.textTertiary)
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .contentShape(Rectangle())
-    }
-
-    var divider: some View {
-        Rectangle()
-            .fill(Color.white.opacity(0.06))
-            .frame(height: 0.5)
-            .padding(.leading, 60)
     }
 
     func handleAddMember() {
@@ -185,6 +174,13 @@ struct FamilyView: View {
             showingAddMember = true
         } else {
             showingPaywall = true
+        }
+    }
+
+    func archiveMember(_ member: FamilyMember) {
+        if let index = members.firstIndex(where: { $0.id == member.id }) {
+            members[index].isArchived = true
+            saveMembers()
         }
     }
 
