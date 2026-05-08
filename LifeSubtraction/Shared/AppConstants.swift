@@ -16,6 +16,9 @@ enum AppConstants {
         static let onboarded = "onboarded"
         static let values = "values"
         static let isPremium = "isPremium"
+        // 修改内容 — 家人系統
+        static let familyMembers = "family-members"
+        static let familyMomentRecords = "family-moment-records"
     }
 }
 
