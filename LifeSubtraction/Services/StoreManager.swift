@@ -127,4 +127,11 @@ class StoreManager: ObservableObject {
         guard let product = premiumProduct else { return "NT$90" }
         return product.displayPrice
     }
+
+    // 修改内容 — 家人系統付費權限
+    var freeFamilyMemberLimit: Int { 1 }
+
+    func canAddFamilyMember(currentCount: Int) -> Bool {
+        isPremium || currentCount < freeFamilyMemberLimit
+    }
 }

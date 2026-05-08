@@ -2,6 +2,14 @@ import SwiftUI
 
 struct OverviewView: View {
     @EnvironmentObject var store: LifeStore
+    @EnvironmentObject var storeManager: StoreManager
+
+    // 修改内容 — 動態「你還有幾次？」
+    @State private var moments: [RemainingMomentItem] = []
+    @State private var familyMembers: [FamilyMember] = []
+    @State private var showingAddMoment = false
+
+    var activeItems: [RemainingMomentItem] { moments.filter { !$0.isArchived } }
 
     var body: some View {
         NavigationView {
@@ -32,6 +40,14 @@ struct OverviewView: View {
             .navigationTitle("人生減法")
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.hidden, for: .navigationBar)   // // modified
+            .onAppear { loadData() }
+            .sheet(isPresented: $showingAddMoment, onDismiss: loadData) {
+                AddRemainingMomentView { item in
+                    moments.append(item)
+                    saveMoments()
+                }
+                .environmentObject(storeManager)
+            }
         }
     }
 
@@ -109,47 +125,164 @@ struct OverviewView: View {
         .cardStyle()
     }
 
-    // MARK: - 你還有幾次  // modified
+    // MARK: - 你還有幾次（動態）  // 修改内容
 
     var countdownSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text("你還有幾次？")
                     .font(.headline)
-                    .foregroundStyle(LifeTheme.textPrimary)                // // modified
+                    .foregroundStyle(LifeTheme.textPrimary)
                 Spacer()
-                Image(systemName: "infinity.circle.fill")
-                    .foregroundStyle(LifeTheme.accentEnd)                  // // modified
+                Button {
+                    showingAddMoment = true
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundStyle(LifeTheme.accent)
+                        .font(.title3)
+                }
             }
 
-            VStack(spacing: 0) {
-                CountdownRow(icon: "sparkles", color: LifeTheme.warm, label: "新年", count: store.newYearsLeft, unit: "次")
-                divider
-                CountdownRow(icon: "airplane", color: LifeTheme.accent, label: "出國旅行（每年一次）", count: store.tripsLeft, unit: "次")
-                divider
-                CountdownRow(icon: "heart", color: LifeTheme.accentEnd, label: "探望父母（每月一次）", count: store.parentVisitsLeft, unit: "次")
-                divider
-                CountdownRow(icon: "book", color: LifeTheme.accent, label: "讀一本書（每月一本）", count: store.booksLeft, unit: "本")
-                divider
-                CountdownRow(icon: "sun.max", color: LifeTheme.warm, label: "夏天", count: store.summersLeft, unit: "個")
+            if activeItems.isEmpty {
+                momentEmptyState
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(Array(activeItems.enumerated()), id: \.element.id) { index, item in
+                        let count = item.remainingCount(
+                            userYearsRemaining: store.metrics.yearsRemaining,
+                            familyMembers: familyMembers
+                        )
+                        let linkedMember = familyMembers.first {
+                            $0.id == item.linkedFamilyMemberId && !$0.isArchived
+                        }
+                        NavigationLink {
+                            RemainingMomentDetailView(
+                                item: item,
+                                userYearsRemaining: store.metrics.yearsRemaining,
+                                familyMembers: familyMembers
+                            )
+                        } label: {
+                            momentRow(item: item, count: count, linkedMember: linkedMember)
+                        }
+                        .buttonStyle(.plain)
+
+                        if index < activeItems.count - 1 {
+                            Rectangle()
+                                .fill(Color.white.opacity(0.06))
+                                .frame(height: 0.5)
+                                .padding(.leading, 56)
+                        }
+                    }
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(LifeTheme.glassFill)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(LifeTheme.glassBorder, lineWidth: 0.5)
+                )
             }
+        }
+    }
+
+    // 修改内容 — 動態列
+    func momentRow(item: RemainingMomentItem, count: Int, linkedMember: FamilyMember?) -> some View {
+        HStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(LifeTheme.accentSoft)
+                    .frame(width: 36, height: 36)
+                Image(systemName: item.icon)
+                    .font(.subheadline)
+                    .foregroundStyle(LifeTheme.accent)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.name)
+                    .font(.subheadline)
+                    .foregroundStyle(LifeTheme.textPrimary)
+                if let member = linkedMember {
+                    HStack(spacing: 4) {
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 9))
+                        Text(member.name)
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(LifeTheme.accent.opacity(0.7))
+                } else {
+                    Text(item.frequency.displayName)
+                        .font(.caption2)
+                        .foregroundStyle(LifeTheme.textTertiary)
+                }
+            }
+
+            Spacer()
+
+            Text("\(count.formatted())")
+                .font(.system(.subheadline, design: .rounded)).fontWeight(.semibold)
+                .foregroundStyle(LifeTheme.textPrimary)
+            Text("次")
+                .font(.caption)
+                .foregroundStyle(LifeTheme.textSecondary)
+
+            Image(systemName: "chevron.right")
+                .font(.caption2)
+                .foregroundStyle(LifeTheme.textTertiary)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .contentShape(Rectangle())
+    }
+
+    var momentEmptyState: some View {
+        Button {
+            showingAddMoment = true
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "plus.circle.fill")
+                    .foregroundStyle(LifeTheme.accent)
+                Text("新增第一個項目")
+                    .font(.subheadline)
+                    .foregroundStyle(LifeTheme.textSecondary)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(LifeTheme.glassFill)                              // // modified
+                    .fill(LifeTheme.glassFill)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .stroke(LifeTheme.glassBorder, lineWidth: 0.5)
             )
         }
+        .buttonStyle(.plain)
     }
 
-    // 統一 divider 樣式  // modified
-    var divider: some View {
-        Rectangle()
-            .fill(Color.white.opacity(0.06))
-            .frame(height: 0.5)
-            .padding(.leading, 56)
+    // 修改内容 — 載入 + 首次預設
+    func loadData() {
+        familyMembers = LocalJSONStore.load(
+            [FamilyMember].self,
+            key: AppConstants.Key.familyMembers,
+            defaultValue: []
+        )
+        let saved = LocalJSONStore.load(
+            [RemainingMomentItem].self,
+            key: AppConstants.Key.remainingMoments,
+            defaultValue: []
+        )
+        if saved.isEmpty {
+            moments = RemainingMomentItem.defaults
+            saveMoments()
+        } else {
+            moments = saved
+        }
+    }
+
+    func saveMoments() {
+        LocalJSONStore.save(moments, key: AppConstants.Key.remainingMoments)
     }
 }
 
