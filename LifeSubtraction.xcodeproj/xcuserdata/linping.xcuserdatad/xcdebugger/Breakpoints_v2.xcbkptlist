@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "67AD2ABC-00BA-4DCC-92E4-583A5A368FA5"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B9B92E18-5F2B-4305-AACA-62E6980B1F1D"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Build/Intermediates.noindex/LifeSubtraction.build/Debug-iphoneos/LifeSubtraction.build/Objects-normal/arm64/AddFamilyMemberView.d"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1"
+            endingLineNumber = "1"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E4AD61B1-07F0-49BD-888D-F5F2A34C91F6"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LifeSubtraction/Views/OverviewView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "224"
+            endingLineNumber = "224"
+            landmarkName = "lifeJourneyStatsSection"
+            landmarkType = "24">
+            <Locations>
+               <Location
+                  uuid = "E4AD61B1-07F0-49BD-888D-F5F2A34C91F6 - 25779b932da9f695"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.Text, SwiftUI.Text, &lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0)&gt; in LifeSubtraction.OverviewView.lifeMilestonesSection.getter : some"
+                  moduleName = "LifeSubtraction.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/linping/AICompany/apps/LifeSubtraction/LifeSubtraction/Views/OverviewView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "225"
+                  endingLineNumber = "225">
+               </Location>
+               <Location
+                  uuid = "E4AD61B1-07F0-49BD-888D-F5F2A34C91F6 - 258d543dd785522a"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of LifeSubtraction.OverviewView.milestonePlaceholderRow(title: Swift.String, subtitle: Swift.String, icon: Swift.String) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of LifeSubtraction.OverviewView.milestoneDivider : some&gt;&gt;.0, &lt;&lt;opaque return type of LifeSubtraction.OverviewView.milestonePlaceholderRow(title: Swift.String, subtitle: Swift.String, icon: Swift.String) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of LifeSubtraction.OverviewView.milestoneDivider : some&gt;&gt;.0, &lt;&lt;opaque return type of LifeSubtraction.OverviewView.milestonePlaceholderRow(title: Swift.String, subtitle: Swift.String, icon: Swift.String) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of LifeSubtraction.OverviewView.milestoneDivider : some&gt;&gt;.0, &lt;&lt;opaque return type of LifeSubtraction.OverviewView.milestonePlaceholderRow(title: Swift.String, subtitle: Swift.String, icon: Swift.String) -&gt; some&gt;&gt;.0)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.Text, SwiftUI.Text, &lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0)&gt; in LifeSubtraction.OverviewView.lifeMilestonesSection.getter : some"
+                  moduleName = "LifeSubtraction.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/linping/AICompany/apps/LifeSubtraction/LifeSubtraction/Views/OverviewView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "226"
+                  endingLineNumber = "226">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E5D931AB-E342-484F-A899-4CFDE9C4A013"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LifeSubtraction/Views/OverviewView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "534"
+            endingLineNumber = "534"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

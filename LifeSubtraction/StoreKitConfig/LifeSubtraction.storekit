@@ -1,0 +1,37 @@
+{
+  "identifier" : "LifeSubtractionConfig",
+  "nonConsumableProducts" : [
+    {
+      "displayPrice" : "90",
+      "familyShareable" : false,
+      "internalID" : "premium_001",
+      "localizations" : [
+        {
+          "description" : "解鎖今日反思日記、價值觀清單與未來所有更新。",
+          "displayName" : "人生減法完整版",
+          "locale" : "zh_TW"
+        },
+        {
+          "description" : "Unlock daily reflection journal, values list, and all future updates.",
+          "displayName" : "Life Subtraction Premium",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.yourname.lifesubtraction.premium",
+      "referenceName" : "Premium Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInReviewEnabled" : false,
+    "_customerInfoEnabled" : true,
+    "_interruptedPurchasesEnabled" : false,
+    "_localReceiptValidationEnabled" : false,
+    "_transactionExpirationTimeRate" : 1,
+    "_failTransactionEnabled" : false
+  },
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

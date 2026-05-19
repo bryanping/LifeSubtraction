@@ -1,0 +1,22 @@
+# 修改内容：忽略 Xcode 編譯產物
+Build/
+DerivedData/
+*.xcuserstate
+*.xcuserdata/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+# 修改内容：忽略 Swift/Xcode 中間產物
+*.o
+*.d
+*.swiftdeps
+*.swiftmodule
+*.swiftdoc
+*.swiftsourceinfo
+*.app
+*.appex
+*.debug.dylib
+
+# 修改内容：忽略 AI 工具暫存
+.claude/
