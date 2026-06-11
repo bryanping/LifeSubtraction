@@ -91,18 +91,103 @@ public struct LifeMetrics: Equatable, Sendable {
         let cal = Calendar.current
         guard let start = cal.date(byAdding: .day, value: weeksLived * 7, to: birthday) else { return 0 }
         let elapsed = now.timeIntervalSince(start)
-        let weekSeconds: TimeInterval = 7 * 24 * 60 * 60
+        let weekSeconds: TimeInterval = 7 * 86_400
         return min(1.0, max(0.0, elapsed / weekSeconds))
     }
 
-    public var newYearsLeft: Int { yearsRemaining }
-    public var summersLeft: Int { yearsRemaining }
-    public var tripsLeft: Int { yearsRemaining }
-    public var parentVisitsLeft: Int { yearsRemaining * 12 }
-    public var booksLeft: Int { yearsRemaining * 12 }
+    public var progressOfCurrentDay: Double {
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: now)
+        guard let end = cal.date(byAdding: .day, value: 1, to: start) else { return 0 }
+        let total = end.timeIntervalSince(start)
+        guard total > 0 else { return 0 }
+        return min(1.0, max(0.0, now.timeIntervalSince(start) / total))
+    }
+
+    public var expectedEndDate: Date {
+        Calendar.current.date(byAdding: .year, value: lifeExpectancy, to: birthday) ?? now
+    }
+
+    public var secondsRemaining: Double {
+        max(0, expectedEndDate.timeIntervalSince(now))
+    }
+
+    public var yearsRemainingPrecise: Double {
+        secondsRemaining / (365.25 * 86_400)
+    }
+
+    public var monthsRemainingPrecise: Double {
+        secondsRemaining / ((365.25 / 12) * 86_400)
+    }
+
+    public var weeksRemainingPrecise: Double {
+        secondsRemaining / (7 * 86_400)
+    }
+
+    public var hoursRemaining: Double {
+        secondsRemaining / 3_600
+    }
+
+    public var minutesRemaining: Double {
+        secondsRemaining / 60
+    }
+
+    public var hoursRemainingToday: Double {
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: now)
+        guard let end = cal.date(byAdding: .day, value: 1, to: start) else { return 0 }
+        return max(0, end.timeIntervalSince(now) / 3_600)
+    }
+
+    public var newYearsLeft: Int {
+        countSeasonalOccurrences(month: 1, day: 1)
+    }
+
+    public var summersLeft: Int {
+        countRemainingSummers()
+    }
 
     public var percentString: String {
         "\(Int((percentUsed * 100).rounded()))%"
+    }
+
+    private func countSeasonalOccurrences(month: Int, day: Int) -> Int {
+        let cal = Calendar.current
+        let startYear = cal.component(.year, from: now)
+        let endYear = cal.component(.year, from: expectedEndDate)
+        guard startYear <= endYear else { return 0 }
+
+        var count = 0
+        for year in startYear...endYear {
+            var components = DateComponents(year: year, month: month, day: day)
+            guard let candidate = cal.date(from: components) else { continue }
+            if candidate >= cal.startOfDay(for: now), candidate <= expectedEndDate {
+                count += 1
+            }
+        }
+        return count
+    }
+
+    private func countRemainingSummers() -> Int {
+        let cal = Calendar.current
+        let startYear = cal.component(.year, from: now)
+        let endYear = cal.component(.year, from: expectedEndDate)
+        guard startYear <= endYear else { return 0 }
+
+        var count = 0
+        for year in startYear...endYear {
+            let june = DateComponents(year: year, month: 6, day: 1)
+            let august = DateComponents(year: year, month: 8, day: 31)
+            guard
+                let summerStart = cal.date(from: june),
+                let summerEnd = cal.date(from: august)
+            else { continue }
+
+            let windowStart = max(summerStart, cal.startOfDay(for: now))
+            let windowEnd = min(summerEnd, expectedEndDate)
+            if windowStart <= windowEnd { count += 1 }
+        }
+        return count
     }
 
     public static func loadFromShared() -> LifeMetrics {

@@ -39,10 +39,11 @@ class LifeStore: ObservableObject {
         didSet { save() }
     }
 
-    /// App Group 共享，讓 Widget / Watch 也讀得到。
     private let defaults: UserDefaults = .shared
 
     init() {
+        MigrationManager.runIfNeeded()
+
         let savedBirthday = defaults.object(forKey: AppConstants.Key.birthday) as? Date
             ?? Calendar.current.date(byAdding: .year, value: -30, to: Date())!
         self.birthday = savedBirthday
@@ -77,18 +78,15 @@ class LifeStore: ObservableObject {
     var totalDays: Int { metrics.totalDays }
     var daysRemaining: Int { metrics.daysRemaining }
     var percentUsed: Double { metrics.percentUsed }
+    var percentRemaining: Double { metrics.percentRemaining }
     var ageYears: Int { metrics.ageYears }
     var weeksLived: Int { metrics.weeksLived }
     var weeksRemaining: Int { metrics.weeksRemaining }
     var totalWeeks: Int { metrics.totalWeeks }
-    var yearsRemaining: Double { Double(metrics.daysRemaining) / 365.25 }
-    var monthsRemaining: Int { metrics.daysRemaining / 30 }
-
+    var yearsRemaining: Int { metrics.yearsRemaining }
+    var monthsRemaining: Int { Int(metrics.monthsRemainingPrecise.rounded(.down)) }
     var newYearsLeft: Int { metrics.newYearsLeft }
     var summersLeft: Int { metrics.summersLeft }
-    var tripsLeft: Int { metrics.tripsLeft }
-    var parentVisitsLeft: Int { metrics.parentVisitsLeft }
-    var booksLeft: Int { metrics.booksLeft }
 
     var parentYearsRemaining: Int {
         max(0, parentLifeExpectancy - parentAge)

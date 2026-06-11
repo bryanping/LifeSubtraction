@@ -50,6 +50,7 @@ enum StorageKey {
     static let legacyPersonalEventItems = "remaining-moment-items"
     static let legacyPersonalEventRecords = "remaining-moment-records"
     static let lifeJourneyStatItems    = "life-journey-stat-items"
+    static let lifeJourneyStatRecords  = "life-journey-stat-records"
     static let familyMembers           = AppConstants.Key.familyMembers
     static let familyMomentRecords     = AppConstants.Key.familyMomentRecords
     static let legacyLifeGoals         = "life-goals"

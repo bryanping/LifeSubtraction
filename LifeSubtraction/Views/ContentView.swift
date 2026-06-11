@@ -5,14 +5,12 @@ struct ContentView: View {
     @StateObject private var storeManager = StoreManager.shared
 
     init() {
-        // 全 App 使用半透明深色 TabBar  // modified
         let appearance = UITabBarAppearance()
         appearance.configureWithTransparentBackground()
         appearance.backgroundColor = UIColor.black.withAlphaComponent(0.35)
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
 
-        // NavigationBar 大標題：透明 + 白色文字  // modified
         let nav = UINavigationBarAppearance()
         nav.configureWithTransparentBackground()
         nav.titleTextAttributes = [.foregroundColor: UIColor.white]
@@ -23,7 +21,7 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            LifeTheme.subtleBackground.ignoresSafeArea()  // // modified — 全 App 深藍黑底
+            LifeTheme.subtleBackground.ignoresSafeArea()
 
             if !store.hasCompletedOnboarding {
                 OnboardingView()
@@ -32,14 +30,12 @@ struct ContentView: View {
                 TabView {
                     OverviewView()
                         .tabItem { Label("總覽", systemImage: "chart.pie.fill") }
-                    WeekGridView()
-                        .tabItem { Label("生命週", systemImage: "squareshape.split.3x3") }
                     CountdownView()
                 //        .premiumGate()
                         .tabItem { Label("倒數", systemImage: "hourglass") }
                     ValuesView()
                 //        .premiumGate()
-                        .tabItem { Label("價值觀", systemImage: "heart.fill") }
+                        .tabItem { Label("人生目標", systemImage: "target") }
                     SettingsView()
                         .tabItem { Label("設定", systemImage: "gearshape.fill") }
                 }
@@ -47,15 +43,11 @@ struct ContentView: View {
                 .environmentObject(storeManager)
             }
         }
-        .preferredColorScheme(.dark) // // modified — 鎖定暗色，讓系統元件配合
+        .preferredColorScheme(.dark)
     }
 }
 
 #Preview {
-    let store = LifeStore()
-    return NavigationStack {
-        ContentView()
-            .environmentObject(store)
-    }
+    ContentView()
+        .environmentObject(LifeStore())
 }
-

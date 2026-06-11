@@ -32,13 +32,12 @@ struct SettingsView: View {
                 PaywallView().environmentObject(storeManager)
             }
             .alert("確定重置？", isPresented: $showResetAlert) {
-                Button("重置", role: .destructive) {
-                    UserDefaults.shared.removeObject(forKey: AppConstants.Key.onboarded)
-                    store.hasCompletedOnboarding = false
+                Button("完整清除", role: .destructive) {
+                    resetAllData()
                 }
                 Button("取消", role: .cancel) {}
             } message: {
-                Text("所有資料將被清除，此操作無法還原。")
+                Text("所有資料將被清除並回到 onboarding，此操作無法還原。")
             }
         }
     }
@@ -295,5 +294,38 @@ struct SettingsView: View {
             .padding(.horizontal, 16).padding(.vertical, 14)
             .contentShape(Rectangle())
         }
+    }
+
+    func resetAllData() {
+        let keysToRemove = [
+            AppConstants.Key.birthday,
+            AppConstants.Key.lifeExpectancy,
+            AppConstants.Key.onboarded,
+            AppConstants.Key.values,
+            AppConstants.Key.familyMembers,
+            AppConstants.Key.familyMomentRecords,
+            StorageKey.lifeGoals,
+            StorageKey.regretItems,
+            StorageKey.reflectionEntries,
+            StorageKey.remainingMomentItems,
+            StorageKey.remainingMomentRecords,
+            StorageKey.lifeJourneyStatItems,
+            StorageKey.lifeJourneyStatRecords,
+            JourneyStatsBootstrap.questionnaireDoneKey,
+            "parentAge",
+            "parentLifeExpectancy",
+            "data-migration-version"
+        ]
+
+        for key in keysToRemove {
+            UserDefaults.shared.removeObject(forKey: key)
+        }
+
+        store.values = [
+            LifeValue(name: "家人", icon: "house.fill"),
+            LifeValue(name: "健康", icon: "heart.fill"),
+            LifeValue(name: "成長", icon: "leaf.fill"),
+        ]
+        store.hasCompletedOnboarding = false
     }
 }

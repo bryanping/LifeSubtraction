@@ -119,14 +119,7 @@ struct RemainingMomentItem: Identifiable, Codable, Hashable {
 // 修改内容 — 第一次啟動時的預設項目，沿用原本的固定列。
 // 注意：「探望父母」的 dependsOn 改為 .parents，避免被算成自己的剩餘年數。
 extension RemainingMomentItem {
-    static let defaults: [RemainingMomentItem] = [
-        RemainingMomentItem(title: "新年",       iconName: "sparkles", unit: "次", frequency: .yearly),
-        RemainingMomentItem(title: "出國旅行",   iconName: "airplane", unit: "次", frequency: .yearly),
-        RemainingMomentItem(title: "探望父母",   iconName: "heart",    unit: "次", frequency: .monthly,
-                            dependsOn: .parents),                            // 修改内容
-        RemainingMomentItem(title: "讀一本書",   iconName: "book",     unit: "本", frequency: .monthly),
-        RemainingMomentItem(title: "夏天",       iconName: "sun.max",  unit: "個", frequency: .yearly)
-    ]
+    static let defaults: [RemainingMomentItem] = []
 
     // 修改内容 — 舊資料遷移：標題含「父母」且 dependsOn 還是 .selfLife 時自動修正。
     /// 對一陣列做就地遷移，回傳是否有變動。

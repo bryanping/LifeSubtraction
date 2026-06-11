@@ -2,134 +2,267 @@ import SwiftUI
 
 struct ValuesView: View {
     @EnvironmentObject var store: LifeStore
-    @State private var showAddSheet = false
+
+    @State private var showAddValueSheet = false
     @State private var newName = ""
     @State private var newIcon = "star"
 
-    let iconOptions = ["star", "heart", "leaf", "bolt", "flame", "person.2", "house", "book", "music.note", "paintbrush", "sportscourt", "globe"]
+    @State private var lifeGoals: [LifeGoal] = []
+    @State private var regretItems: [RegretAvoidanceItem] = []
+    @State private var alignmentRecord: LifeAlignmentRecord?
+    @State private var showingAddGoal = false
+    @State private var showingAddRegret = false
+
+    private let iconOptions = [
+        "star", "heart", "leaf", "bolt", "flame", "person.2",
+        "house", "book", "music.note", "paintbrush", "sportscourt", "globe"
+    ]
 
     var body: some View {
-        NavigationView {
-            // List 改成 ScrollView + 自繪卡片，配合暗色玻璃感  // modified
+        NavigationStack {
             ScrollView {
-                VStack(spacing: 14) {
-                    Text("寫下你最重視的事物，讓每天的選擇都有方向。")
-                        .font(.subheadline)
-                        .foregroundStyle(LifeTheme.textSecondary)          // // modified
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-
-                    ForEach($store.values) { $value in
-                        ValueRow(value: $value, onDelete: { id in
-                            store.values.removeAll { $0.id == id }
-                        })
-                        .padding(.horizontal)
-                    }
-
-                    Spacer(minLength: 24)
+                VStack(spacing: 20) {
+                    valuesSection
+                    actionSection
                 }
-                .padding(.top, 8)
+                .padding(.horizontal)
+                .padding(.vertical, 16)
             }
-            .scrollContentBackground(.hidden)                              // // modified
             .background(LifeTheme.subtleBackground.ignoresSafeArea())
-            .navigationTitle("我的價值觀")
+            .navigationTitle("人生目標")
             .navigationBarTitleDisplayMode(.large)
-            .toolbarBackground(.hidden, for: .navigationBar)               // // modified
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showAddSheet = true }) {
+                    Menu {
+                        Button { showAddValueSheet = true } label: {
+                            Label("新增價值觀", systemImage: "heart")
+                        }
+                        Button { showingAddGoal = true } label: {
+                            Label("新增行動", systemImage: "target")
+                        }
+                        Button { showingAddRegret = true } label: {
+                            Label("新增避免遺憾", systemImage: "lightbulb")
+                        }
+                    } label: {
                         Image(systemName: "plus")
-                            .foregroundStyle(LifeTheme.accent)             // // modified
+                            .foregroundStyle(LifeTheme.accent)
                     }
                 }
             }
-            .sheet(isPresented: $showAddSheet) {
-                addSheet
+            .onAppear { loadAllData() }
+            .sheet(isPresented: $showAddValueSheet) { addValueSheet }
+            .sheet(isPresented: $showingAddGoal) {
+                AddGoalSheet { goal in
+                    lifeGoals.append(goal)
+                    saveGoals()
+                }
+            }
+            .sheet(isPresented: $showingAddRegret) {
+                AddRegretSheet { item in
+                    regretItems.append(item)
+                    saveRegretItems()
+                }
             }
         }
     }
 
-    var addSheet: some View {
-        NavigationView {
-            ZStack {
-                LifeTheme.subtleBackground.ignoresSafeArea()               // // modified
+    // MARK: - 價值觀
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("名稱")
-                            .font(.subheadline).fontWeight(.medium)
-                            .foregroundStyle(LifeTheme.textSecondary)
-                        TextField("例如：家人、健康、創作", text: $newName)
-                            .padding(14)
-                            .background(
-                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .fill(LifeTheme.glassFill)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .stroke(LifeTheme.glassBorder, lineWidth: 0.5)
-                            )
-                            .foregroundStyle(LifeTheme.textPrimary)        // // modified
+    var valuesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("價值觀", subtitle: "什麼對我最重要")
 
-                        Text("圖示")
-                            .font(.subheadline).fontWeight(.medium)
-                            .foregroundStyle(LifeTheme.textSecondary)
-                            .padding(.top, 8)
-
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
-                            ForEach(iconOptions, id: \.self) { icon in
-                                Image(systemName: icon)
-                                    .font(.title3)
-                                    .foregroundStyle(newIcon == icon ? LifeTheme.accent : LifeTheme.textTertiary) // // modified
-                                    .frame(width: 44, height: 44)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                            .fill(newIcon == icon ? LifeTheme.accentSoft : Color.white.opacity(0.04))
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                            .stroke(newIcon == icon ? LifeTheme.accentMuted : LifeTheme.glassBorder, lineWidth: 0.5)
-                                    )
-                                    .onTapGesture { newIcon = icon }
-                            }
-                        }
-                        .padding(.top, 4)
-
-                        Spacer(minLength: 24)
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 8)
+            ForEach($store.values) { $value in
+                ValueRow(value: $value) { id in
+                    store.values.removeAll { $0.id == id }
                 }
             }
+        }
+    }
+
+    // MARK: - 行動清單
+
+    var actionSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionHeader("行動清單", subtitle: "我要把時間投入哪裡")
+
+            if !lifeGoals.isEmpty {
+                actionGroup(title: "人生目標") {
+                    ForEach($lifeGoals) { $goal in
+                        goalRow($goal)
+                    }
+                }
+            }
+
+            actionGroup(title: "避免遺憾") {
+                if regretItems.isEmpty {
+                    Text("80 歲的你，會後悔什麼沒做？")
+                        .font(.caption)
+                        .foregroundStyle(LifeTheme.textTertiary)
+                } else {
+                    ForEach(regretItems) { item in
+                        regretRow(item)
+                    }
+                }
+            }
+
+            actionGroup(title: "人生對齊") {
+                Text("今天的行動，有接近你想成為的人嗎？")
+                    .font(.caption)
+                    .foregroundStyle(LifeTheme.textTertiary)
+
+                ForEach(LifeAlignmentLevel.allCases) { level in
+                    Button { selectAlignment(level) } label: {
+                        HStack {
+                            Text(level.displayName)
+                                .foregroundStyle(
+                                    alignmentRecord?.level == level
+                                        ? Color.white
+                                        : LifeTheme.textPrimary
+                                )
+                            Spacer()
+                            if alignmentRecord?.level == level {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .padding(12)
+                        .background(
+                            alignmentRecord?.level == level
+                                ? AnyShapeStyle(LifeTheme.heroGradient)
+                                : AnyShapeStyle(LifeTheme.glassFill)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    func sectionHeader(_ title: String, subtitle: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(LifeTheme.textPrimary)
+            Text(subtitle)
+                .font(.subheadline)
+                .foregroundStyle(LifeTheme.textSecondary)
+        }
+    }
+
+    func actionGroup<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(LifeTheme.textSecondary)
+            content()
+        }
+        .cardStyle()
+    }
+
+    func goalRow(_ goal: Binding<LifeGoal>) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(goal.wrappedValue.title)
+                    .font(.subheadline)
+                    .foregroundStyle(goal.wrappedValue.isCompleted ? LifeTheme.textTertiary : LifeTheme.textPrimary)
+                    .strikethrough(goal.wrappedValue.isCompleted)
+                Spacer()
+                Button {
+                    goal.wrappedValue.isCompleted.toggle()
+                    saveGoals()
+                } label: {
+                    Image(systemName: goal.wrappedValue.isCompleted ? "checkmark.circle.fill" : "circle")
+                        .foregroundStyle(goal.wrappedValue.isCompleted ? .green : LifeTheme.textTertiary)
+                }
+            }
+            Slider(value: goal.progress, in: 0...1) { _ in saveGoals() }
+                .tint(LifeTheme.accent)
+        }
+    }
+
+    func regretRow(_ item: RegretAvoidanceItem) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.title)
+                    .font(.subheadline)
+                    .foregroundStyle(LifeTheme.textPrimary)
+                Text(item.status.displayName)
+                    .font(.caption)
+                    .foregroundStyle(LifeTheme.textTertiary)
+            }
+            Spacer()
+        }
+    }
+
+    var addValueSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    TextField("例如：家人、健康、自由", text: $newName)
+                        .padding(14)
+                        .background(RoundedRectangle(cornerRadius: 14).fill(LifeTheme.glassFill))
+                        .foregroundStyle(LifeTheme.textPrimary)
+
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
+                        ForEach(iconOptions, id: \.self) { icon in
+                            Image(systemName: icon)
+                                .foregroundStyle(newIcon == icon ? LifeTheme.accent : LifeTheme.textTertiary)
+                                .frame(width: 44, height: 44)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(newIcon == icon ? LifeTheme.accentSoft : Color.white.opacity(0.04))
+                                )
+                                .onTapGesture { newIcon = icon }
+                        }
+                    }
+                }
+                .padding()
+            }
+            .background(LifeTheme.subtleBackground.ignoresSafeArea())
             .navigationTitle("新增價值觀")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("取消") {
-                        showAddSheet = false
-                        newName = ""
-                    }
-                    .foregroundStyle(LifeTheme.textSecondary)              // // modified
+                    Button("取消") { showAddValueSheet = false; newName = "" }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("加入") {
                         guard !newName.isEmpty else { return }
                         store.values.append(LifeValue(name: newName, icon: newIcon))
-                        showAddSheet = false
+                        showAddValueSheet = false
                         newName = ""
                         newIcon = "star"
                     }
-                    .foregroundStyle(LifeTheme.accent)                     // // modified
-                    .disabled(newName.isEmpty)
                 }
             }
         }
     }
+
+    func loadAllData() {
+        lifeGoals = LocalJSONStore.load([LifeGoal].self, key: StorageKey.lifeGoals, defaultValue: [])
+        regretItems = LocalJSONStore.load([RegretAvoidanceItem].self, key: StorageKey.regretItems, defaultValue: [])
+        let todayKey = StorageKey.alignment()
+        alignmentRecord = LocalJSONStore.loadOptional(LifeAlignmentRecord.self, key: todayKey)
+    }
+
+    func saveGoals() {
+        LocalJSONStore.save(lifeGoals, key: StorageKey.lifeGoals)
+    }
+
+    func saveRegretItems() {
+        LocalJSONStore.save(regretItems, key: StorageKey.regretItems)
+    }
+
+    func selectAlignment(_ level: LifeAlignmentLevel) {
+        alignmentRecord = LifeAlignmentRecord(date: Date(), level: level)
+        LocalJSONStore.save(alignmentRecord, key: StorageKey.alignment())
+    }
 }
 
-// MARK: - ValueRow  // modified — 自繪玻璃卡 + 展開反思
+// MARK: - ValueRow
 
 struct ValueRow: View {
     @Binding var value: LifeValue
@@ -139,20 +272,17 @@ struct ValueRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                ZStack {
-                    Circle()
-                        .fill(LifeTheme.accentSoft)
-                        .frame(width: 36, height: 36)
-                    Image(systemName: value.icon)
-                        .foregroundStyle(LifeTheme.accent)
-                }
+                Image(systemName: value.icon)
+                    .foregroundStyle(LifeTheme.accent)
+                    .frame(width: 36, height: 36)
+                    .background(LifeTheme.accentSoft, in: Circle())
                 Text(value.name)
-                    .font(.body).fontWeight(.medium)
-                    .foregroundStyle(LifeTheme.textPrimary)                // // modified
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(LifeTheme.textPrimary)
                 Spacer()
                 Image(systemName: expanded ? "chevron.up" : "chevron.down")
                     .font(.caption)
-                    .foregroundStyle(LifeTheme.textTertiary)               // // modified
+                    .foregroundStyle(LifeTheme.textTertiary)
             }
             .contentShape(Rectangle())
             .onTapGesture { withAnimation { expanded.toggle() } }
@@ -160,26 +290,84 @@ struct ValueRow: View {
             if expanded {
                 TextField("為什麼這對你重要？", text: $value.reflection, axis: .vertical)
                     .font(.subheadline)
-                    .foregroundStyle(LifeTheme.textSecondary)              // // modified
-                    .lineLimit(3...6)
+                    .foregroundStyle(LifeTheme.textSecondary)
+                    .lineLimit(2...5)
                     .padding(10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Color.white.opacity(0.04))
-                    )
+                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.04)))
 
                 HStack {
                     Spacer()
-                    Button(role: .destructive) {
-                        onDelete(value.id)
-                    } label: {
-                        Label("刪除", systemImage: "trash")
-                            .font(.caption)
+                    Button(role: .destructive) { onDelete(value.id) } label: {
+                        Label("刪除", systemImage: "trash").font(.caption)
                     }
-                    .foregroundStyle(Color.red.opacity(0.85))               // // modified
                 }
             }
         }
         .cardStyle()
     }
+}
+
+// MARK: - Sheets
+
+struct AddGoalSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var title = ""
+    @State private var note = ""
+    @State private var progress: Double = 0
+    let onSave: (LifeGoal) -> Void
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("目標") {
+                    TextField("例如：每月陪父母一次", text: $title)
+                    TextField("備註", text: $note, axis: .vertical)
+                    Slider(value: $progress, in: 0...1)
+                }
+            }
+            .navigationTitle("新增行動")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("取消") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("儲存") {
+                        onSave(LifeGoal(title: title, note: note, progress: progress))
+                        dismiss()
+                    }
+                    .disabled(title.isEmpty)
+                }
+            }
+        }
+    }
+}
+
+struct AddRegretSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var title = ""
+    let onSave: (RegretAvoidanceItem) -> Void
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("80 歲的你會後悔什麼？") {
+                    TextField("輸入重要的事", text: $title)
+                }
+            }
+            .navigationTitle("避免遺憾")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("取消") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("儲存") {
+                        onSave(RegretAvoidanceItem(title: title, status: .notStarted, createdAt: Date()))
+                        dismiss()
+                    }
+                    .disabled(title.isEmpty)
+                }
+            }
+        }
+    }
+}
+
+#Preview {
+    ValuesView()
+        .environmentObject(LifeStore())
 }

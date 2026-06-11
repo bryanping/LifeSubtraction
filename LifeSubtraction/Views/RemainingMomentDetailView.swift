@@ -1,20 +1,33 @@
 import SwiftUI
 
-// 修改内容
-// Moment 細節頁：剩餘次數、頻率、紀錄列表 + 新增紀錄。
-// 修正父母剩餘次數估算：父母類型改用 parentLifeExpectancy - parentAge，不再用自己的剩餘年限限制。
-
 struct RemainingMomentDetailView: View {
     let item: RemainingMomentItem
+    @Binding var journeyStats: [LifeJourneyStatItem]
+    @Binding var journeyRecords: [LifeJourneyStatRecord]
+
     @EnvironmentObject var store: LifeStore
 
     @State private var allRecords: [RemainingMomentRecord] = []
     @State private var showingAddRecord = false
 
+    init(
+        item: RemainingMomentItem,
+        journeyStats: Binding<[LifeJourneyStatItem]>,
+        journeyRecords: Binding<[LifeJourneyStatRecord]>
+    ) {
+        self.item = item
+        _journeyStats = journeyStats
+        _journeyRecords = journeyRecords
+    }
+
     private var myRecords: [RemainingMomentRecord] {
         allRecords
             .filter { $0.itemId == item.id }
             .sorted(by: { $0.date > $1.date })
+    }
+
+    private var linkedStat: LifeJourneyStatItem? {
+        journeyStats.first { $0.linkedMomentId == item.id && !$0.isArchived }
     }
 
     var body: some View {
@@ -23,9 +36,7 @@ struct RemainingMomentDetailView: View {
                 detailHeader
                     .padding(.horizontal)
 
-                Button {
-                    showingAddRecord = true
-                } label: {
+                Button { showingAddRecord = true } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "plus.circle.fill")
                         Text("新增一次記錄")
@@ -36,9 +47,13 @@ struct RemainingMomentDetailView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(Capsule().fill(LifeTheme.heroGradient))
-                    .shadow(color: LifeTheme.accent.opacity(0.25), radius: 14, y: 6)
                 }
                 .padding(.horizontal)
+
+                if let stat = linkedStat {
+                    cumulativeSummary(for: stat)
+                        .padding(.horizontal)
+                }
 
                 recordList
                     .padding(.horizontal)
@@ -56,24 +71,19 @@ struct RemainingMomentDetailView: View {
             AddRemainingMomentRecordView(item: item) { record in
                 allRecords.append(record)
                 saveRecords()
+                syncJourneyRecord(from: record)
             }
-            .environmentObject(store) // 修改内容
+            .environmentObject(store)
         }
     }
-
-    // MARK: - Header
 
     var detailHeader: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                ZStack {
-                    Circle()
-                        .fill(LifeTheme.accentSoft)
-                        .frame(width: 44, height: 44)
-
-                    Image(systemName: item.iconName)
-                        .foregroundStyle(LifeTheme.accent)
-                }
+                Image(systemName: item.iconName)
+                    .foregroundStyle(LifeTheme.accent)
+                    .frame(width: 36, height: 36)
+                    .background(LifeTheme.accentSoft, in: Circle())
 
                 Text(item.title)
                     .font(.headline)
@@ -89,96 +99,56 @@ struct RemainingMomentDetailView: View {
                     .foregroundStyle(LifeTheme.accent)
             }
 
-            Text("這件事還可能有多少次？")
-                .font(.subheadline)
-                .foregroundStyle(LifeTheme.textSecondary)
-
             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text("\(estimatedRemainingCount)")
-                    .font(.system(size: 64, weight: .light, design: .rounded))
-                    .foregroundStyle(LifeTheme.accent)
-
+                Text("約剩")
+                    .font(.subheadline)
+                    .foregroundStyle(LifeTheme.textSecondary)
+                Text("\(estimatedRemainingCount.formatted())")
+                    .font(.system(size: 56, weight: .light, design: .rounded))
+                    .foregroundStyle(LifeTheme.warm)
                 Text(item.unit)
                     .font(.title3)
                     .foregroundStyle(LifeTheme.textSecondary)
             }
 
-            HStack(spacing: 6) {
-                Image(systemName: item.dependsOn == .parents ? "person.2.fill" : "person.fill")
-                    .font(.caption2)
-                    .foregroundStyle(item.dependsOn == .parents ? LifeTheme.warm : LifeTheme.textTertiary)
-
-                Text(item.dependsOn.hint)
-                    .font(.caption)
-                    .foregroundStyle(LifeTheme.textTertiary)
-
-                if item.dependsOn == .parents {
-                    Text("父母剩餘約 \(store.parentYearsRemaining) 年") // 修改内容
-                        .font(.caption2)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(LifeTheme.warmSoft, in: Capsule())
-                        .foregroundStyle(LifeTheme.warm)
-                }
-            }
-
-            HStack {
-                stat(label: "已記錄", value: "\(myRecords.count)")
-                Spacer()
-                stat(label: "估算總次數", value: "\(estimatedTotal)")
-                Spacer()
-                stat(label: "剩餘年數", value: "\(remainingYearsForEstimate)")
-            }
-            .padding(.top, 4)
+            Text(item.dependsOn.hint)
+                .font(.caption)
+                .foregroundStyle(LifeTheme.textTertiary)
         }
         .cardStyle()
     }
 
-    func stat(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(value)
-                .font(.system(.subheadline, design: .rounded))
-                .fontWeight(.semibold)
+    func cumulativeSummary(for stat: LifeJourneyStatItem) -> some View {
+        let total = JourneyStatCalculator.totalCount(item: stat, records: journeyRecords)
+        let thisMonth = JourneyStatCalculator.thisMonthCount(itemId: stat.id, records: journeyRecords)
+        let lastMonth = JourneyStatCalculator.lastMonthCount(itemId: stat.id, records: journeyRecords)
+
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("人生累積")
+                .font(.headline)
                 .foregroundStyle(LifeTheme.textPrimary)
-
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(LifeTheme.textTertiary)
+            Text("總累積 \(total.formatted()) \(stat.unit)")
+                .font(.subheadline)
+                .foregroundStyle(LifeTheme.textPrimary)
+            Text("上月 +\(lastMonth) · 本月 +\(thisMonth)")
+                .font(.caption)
+                .foregroundStyle(LifeTheme.textSecondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .cardStyle(padding: 16)
     }
-
-    // MARK: - Record list
 
     var recordList: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("記錄")
-                    .font(.headline)
-                    .foregroundStyle(LifeTheme.textPrimary)
-
-                Spacer()
-
-                if !myRecords.isEmpty {
-                    Text("共 \(myRecords.count) 筆")
-                        .font(.caption2)
-                        .foregroundStyle(LifeTheme.textTertiary)
-                }
-            }
+            Text("記錄")
+                .font(.headline)
+                .foregroundStyle(LifeTheme.textPrimary)
 
             if myRecords.isEmpty {
-                Text("還沒有記錄。從上方按鈕新增第一筆吧。")
+                Text("新增紀錄後，會同步累積到總覽。")
                     .font(.subheadline)
                     .foregroundStyle(LifeTheme.textSecondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(LifeTheme.glassFill)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(LifeTheme.glassBorder, lineWidth: 0.5)
-                    )
+                    .cardStyle(padding: 16)
             } else {
                 ForEach(myRecords) { record in
                     recordRow(record)
@@ -196,10 +166,8 @@ struct RemainingMomentDetailView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(formatted(record.date))
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(LifeTheme.textPrimary)
-
                 if !record.note.isEmpty {
                     Text(record.note)
                         .font(.caption)
@@ -210,8 +178,7 @@ struct RemainingMomentDetailView: View {
             Spacer()
 
             Button(role: .destructive) {
-                allRecords.removeAll { $0.id == record.id }
-                saveRecords()
+                deleteRecord(record)
             } label: {
                 Image(systemName: "trash")
                     .font(.caption)
@@ -229,29 +196,34 @@ struct RemainingMomentDetailView: View {
         )
     }
 
-    // MARK: - Computed
+    var estimatedRemainingCount: Int {
+        item.estimatedRemainingOccurrences(store: store, metrics: store.metrics)
+    }
 
-    var remainingYearsForEstimate: Int {
-        switch item.dependsOn {
-        case .selfLife:
-            return max(0, store.lifeExpectancy - store.ageYears)
+    func syncJourneyRecord(from record: RemainingMomentRecord) {
+        guard let stat = linkedStat else { return }
+        journeyRecords.append(
+            LifeJourneyStatRecord(
+                statItemId: stat.id,
+                date: record.date,
+                note: record.note
+            )
+        )
+        LocalJSONStore.save(journeyRecords, key: StorageKey.lifeJourneyStatRecords)
+    }
 
-        case .parents:
-            // 修改内容
-            // 父母類型直接使用 LifeStore 集中計算後的剩餘年數
-            return store.parentYearsRemaining
+    func deleteRecord(_ record: RemainingMomentRecord) {
+        allRecords.removeAll { $0.id == record.id }
+        saveRecords()
+        if let stat = linkedStat {
+            journeyRecords.removeAll {
+                $0.statItemId == stat.id &&
+                Calendar.current.isDate($0.date, inSameDayAs: record.date) &&
+                $0.note == record.note
+            }
+            LocalJSONStore.save(journeyRecords, key: StorageKey.lifeJourneyStatRecords)
         }
     }
-
-    var estimatedTotal: Int {
-        max(0, remainingYearsForEstimate * item.estimatedTimesPerYear())
-    }
-
-    var estimatedRemainingCount: Int {
-        max(0, estimatedTotal - myRecords.count)
-    }
-
-    // MARK: - Persistence
 
     func loadRecords() {
         allRecords = LocalJSONStore.load(

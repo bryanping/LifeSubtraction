@@ -1,53 +1,77 @@
 import Foundation
 
-/// 「人生累積」自定項目：標題、圖示、數據來源（自動或手動）。
+/// 「人生累積」項目：問卷 baseline + 真實紀錄。
 enum LifeJourneyStatMetricKind: String, Codable, CaseIterable, Identifiable {
-    case daysLived
-    case weekendsLived
-    case birthdays
-    case seasons
-    case yearsLived
-    case monthsLived
-    case daysThisYear
     case manual
 
     var id: String { rawValue }
 
-    var displayName: String {
+    var displayName: String { "手動 / 紀錄累積" }
+
+    var hint: String { "由問卷估算過去，並透過紀錄持續累加" }
+
+    var defaultUnit: String { "次" }
+}
+
+enum JourneyQuestionTemplate: String, Codable, CaseIterable, Identifiable {
+    case reading
+    case familyTime
+    case travel
+
+    var id: String { rawValue }
+
+    var title: String {
         switch self {
-        case .daysLived:       return "已活天數"
-        case .weekendsLived:   return "已經歷週末"
-        case .birthdays:       return "已過生日"
-        case .seasons:         return "春夏秋冬"
-        case .yearsLived:      return "已活年數"
-        case .monthsLived:     return "已活月數"
-        case .daysThisYear:    return "今年已走過"
-        case .manual:          return "手動記錄"
+        case .reading:    return "閱讀"
+        case .familyTime: return "家庭時光"
+        case .travel:     return "旅行"
         }
     }
 
-    var hint: String {
+    var iconName: String {
         switch self {
-        case .daysLived:       return "依生日自動計算至今的天數"
-        case .weekendsLived:   return "依已活天數估算經歷的週末"
-        case .birthdays:       return "依年齡計算已慶祝的生日次數"
-        case .seasons:         return "依年齡計算經歷的四季輪迴"
-        case .yearsLived:      return "依生日自動計算整歲年數"
-        case .monthsLived:     return "依生日自動計算經歷的月份"
-        case .daysThisYear:    return "今年 1 月 1 日起至今的天數"
-        case .manual:          return "自行輸入並維護數字，適合旅行次數等"
+        case .reading:    return "book.fill"
+        case .familyTime: return "person.2.fill"
+        case .travel:     return "airplane"
         }
     }
 
-    var defaultUnit: String {
+    var unit: String {
         switch self {
-        case .daysLived, .daysThisYear: return "天"
-        case .weekendsLived:            return "個"
-        case .birthdays:                return "次"
-        case .seasons:                  return "輪"
-        case .yearsLived:               return "歲"
-        case .monthsLived:              return "個月"
-        case .manual:                   return "次"
+        case .reading:    return "本"
+        case .familyTime: return "次"
+        case .travel:     return "次"
+        }
+    }
+
+    var question: String {
+        switch self {
+        case .reading:    return "你每月平均讀幾本書？"
+        case .familyTime: return "你每月大約見家人幾次？"
+        case .travel:     return "你每年大約出國幾次？"
+        }
+    }
+
+    var frequency: RemainingMomentFrequency {
+        switch self {
+        case .reading, .familyTime: return .monthly
+        case .travel:               return .yearly
+        }
+    }
+
+    var dependsOn: RemainingMomentDependency {
+        switch self {
+        case .familyTime: return .parents
+        default:          return .selfLife
+        }
+    }
+
+    func baselineEstimate(ageYears: Int, rate: Double) -> Int {
+        switch self {
+        case .reading, .familyTime:
+            return max(0, Int((rate * Double(max(ageYears, 1) * 12)).rounded()))
+        case .travel:
+            return max(0, Int((rate * Double(max(ageYears, 1))).rounded()))
         }
     }
 }
@@ -58,7 +82,11 @@ struct LifeJourneyStatItem: Identifiable, Codable, Hashable {
     var iconName: String
     var metricKind: LifeJourneyStatMetricKind
     var unit: String
-    var manualValue: Int?
+    var baselineEstimate: Int
+    var timesPerMonth: Double?
+    var timesPerYear: Double?
+    var linkedMomentId: UUID?
+    var template: JourneyQuestionTemplate?
     var createdAt: Date
     var isArchived: Bool
 
@@ -66,9 +94,13 @@ struct LifeJourneyStatItem: Identifiable, Codable, Hashable {
         id: UUID = UUID(),
         title: String,
         iconName: String,
-        metricKind: LifeJourneyStatMetricKind,
+        metricKind: LifeJourneyStatMetricKind = .manual,
         unit: String? = nil,
-        manualValue: Int? = nil,
+        baselineEstimate: Int = 0,
+        timesPerMonth: Double? = nil,
+        timesPerYear: Double? = nil,
+        linkedMomentId: UUID? = nil,
+        template: JourneyQuestionTemplate? = nil,
         createdAt: Date = Date(),
         isArchived: Bool = false
     ) {
@@ -77,7 +109,11 @@ struct LifeJourneyStatItem: Identifiable, Codable, Hashable {
         self.iconName = iconName
         self.metricKind = metricKind
         self.unit = unit ?? metricKind.defaultUnit
-        self.manualValue = manualValue
+        self.baselineEstimate = baselineEstimate
+        self.timesPerMonth = timesPerMonth
+        self.timesPerYear = timesPerYear
+        self.linkedMomentId = linkedMomentId
+        self.template = template
         self.createdAt = createdAt
         self.isArchived = isArchived
     }
@@ -87,75 +123,97 @@ struct LifeJourneyStatItem: Identifiable, Codable, Hashable {
         id = try c.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
         title = try c.decode(String.self, forKey: .title)
         iconName = try c.decode(String.self, forKey: .iconName)
-        metricKind = try c.decode(LifeJourneyStatMetricKind.self, forKey: .metricKind)
+        metricKind = try c.decodeIfPresent(LifeJourneyStatMetricKind.self, forKey: .metricKind) ?? .manual
         unit = try c.decodeIfPresent(String.self, forKey: .unit) ?? metricKind.defaultUnit
-        manualValue = try c.decodeIfPresent(Int.self, forKey: .manualValue)
+        baselineEstimate = try c.decodeIfPresent(Int.self, forKey: .baselineEstimate) ?? 0
+        timesPerMonth = try c.decodeIfPresent(Double.self, forKey: .timesPerMonth)
+        timesPerYear = try c.decodeIfPresent(Double.self, forKey: .timesPerYear)
+        linkedMomentId = try c.decodeIfPresent(UUID.self, forKey: .linkedMomentId)
+        template = try c.decodeIfPresent(JourneyQuestionTemplate.self, forKey: .template)
         createdAt = try c.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
         isArchived = try c.decodeIfPresent(Bool.self, forKey: .isArchived) ?? false
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, title, iconName, metricKind, unit, manualValue, createdAt, isArchived
+        case id, title, iconName, metricKind, unit, baselineEstimate
+        case timesPerMonth, timesPerYear, linkedMomentId, template, createdAt, isArchived
     }
 }
 
 extension LifeJourneyStatItem {
-    static let defaults: [LifeJourneyStatItem] = [
+    static let templateDefaults: [LifeJourneyStatItem] = JourneyQuestionTemplate.allCases.map {
         LifeJourneyStatItem(
-            title: "已活天數",
-            iconName: "sun.max.fill",
-            metricKind: .daysLived
-        ),
-        LifeJourneyStatItem(
-            title: "已經歷週末",
-            iconName: "calendar",
-            metricKind: .weekendsLived
-        ),
-        LifeJourneyStatItem(
-            title: "已過生日",
-            iconName: "gift.fill",
-            metricKind: .birthdays
-        ),
-        LifeJourneyStatItem(
-            title: "春夏秋冬",
-            iconName: "leaf.fill",
-            metricKind: .seasons
-        ),
-        LifeJourneyStatItem(
-            title: "今年已走過",
-            iconName: "clock.fill",
-            metricKind: .daysThisYear
+            title: $0.title,
+            iconName: $0.iconName,
+            unit: $0.unit,
+            template: $0
         )
-    ]
+    }
+
+    static func isTitleAvailable(_ title: String, among items: [LifeJourneyStatItem]) -> Bool {
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return false }
+        return !items.contains { !$0.isArchived && $0.title == trimmed }
+    }
 }
 
-extension LifeJourneyStatItem {
-    func resolvedValue(store: LifeStore, daysPassedThisYear: Int) -> Int {
-        switch metricKind {
-        case .daysLived:
-            return store.daysLived
-        case .weekendsLived:
-            return store.weeksLived
-        case .birthdays, .seasons:
-            return store.ageYears
-        case .yearsLived:
-            return store.ageYears
-        case .monthsLived:
-            return monthsLived(from: store.birthday)
-        case .daysThisYear:
-            return daysPassedThisYear
-        case .manual:
-            return max(0, manualValue ?? 0)
+enum JourneyStatsBootstrap {
+    static let questionnaireDoneKey = "journey-questionnaire-done"
+
+    static var isQuestionnaireDone: Bool {
+        UserDefaults.shared.bool(forKey: questionnaireDoneKey)
+    }
+
+    static func markQuestionnaireDone() {
+        UserDefaults.shared.set(true, forKey: questionnaireDoneKey)
+    }
+
+    @discardableResult
+    static func applyQuestionnaire(
+        rates: [JourneyQuestionTemplate: Double],
+        ageYears: Int
+    ) -> (stats: [LifeJourneyStatItem], moments: [RemainingMomentItem]) {
+        var stats: [LifeJourneyStatItem] = []
+        var moments: [RemainingMomentItem] = []
+
+        for template in JourneyQuestionTemplate.allCases {
+            let rate = rates[template] ?? 0
+            let moment = RemainingMomentItem(
+                title: template.title,
+                iconName: template.iconName,
+                unit: template.unit,
+                frequency: template.frequency,
+                dependsOn: template.dependsOn
+            )
+            let stat = LifeJourneyStatItem(
+                title: template.title,
+                iconName: template.iconName,
+                unit: template.unit,
+                baselineEstimate: template.baselineEstimate(ageYears: ageYears, rate: rate),
+                timesPerMonth: template.frequency == .monthly ? rate : nil,
+                timesPerYear: template.frequency == .yearly ? rate : nil,
+                linkedMomentId: moment.id,
+                template: template
+            )
+            stats.append(stat)
+            moments.append(moment)
         }
+
+        markQuestionnaireDone()
+        return (stats, moments)
     }
 
-    private func monthsLived(from birthday: Date) -> Int {
-        max(0, Calendar.current.dateComponents([.month], from: birthday, to: Date()).month ?? 0)
-    }
-
-    func displayValue(store: LifeStore, daysPassedThisYear: Int) -> String {
-        let count = resolvedValue(store: store, daysPassedThisYear: daysPassedThisYear)
-        let formatted = count.formatted(.number.grouping(.automatic))
-        return "\(formatted) \(unit)"
+    static func appendJourneyRecord(
+        for moment: RemainingMomentItem,
+        note: String = "",
+        stats: inout [LifeJourneyStatItem],
+        records: inout [LifeJourneyStatRecord]
+    ) {
+        guard let stat = stats.first(where: { $0.linkedMomentId == moment.id && !$0.isArchived }) else {
+            return
+        }
+        records.append(
+            LifeJourneyStatRecord(statItemId: stat.id, date: Date(), note: note)
+        )
     }
 }

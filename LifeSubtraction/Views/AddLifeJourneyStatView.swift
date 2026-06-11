@@ -4,91 +4,69 @@ struct AddLifeJourneyStatView: View {
     @Environment(\.dismiss) private var dismiss
 
     let existing: LifeJourneyStatItem?
+    let existingItems: [LifeJourneyStatItem]
     let onSave: (LifeJourneyStatItem) -> Void
 
     @State private var title = ""
     @State private var unit = "次"
     @State private var iconName = "star.fill"
-    @State private var metricKind: LifeJourneyStatMetricKind = .daysLived
-    @State private var manualValueText = ""
+    @State private var baselineText = "0"
 
     private let iconOptions = [
         "star.fill", "heart.fill", "leaf.fill", "bolt.fill", "flame.fill",
         "house.fill", "person.2.fill", "book.fill", "music.note", "paintbrush.fill",
-        "sportscourt.fill", "globe", "airplane", "sparkles", "sun.max.fill",
-        "moon.fill", "cup.and.saucer.fill", "fork.knife", "camera.fill", "film.fill",
-        "calendar", "gift.fill", "clock.fill", "figure.walk", "mountain.2.fill"
+        "sportscourt.fill", "globe", "airplane", "sparkles", "figure.run",
+        "camera.fill", "film.fill", "figure.walk", "mountain.2.fill"
     ]
 
-    init(existing: LifeJourneyStatItem? = nil, onSave: @escaping (LifeJourneyStatItem) -> Void) {
+    init(
+        existing: LifeJourneyStatItem? = nil,
+        existingItems: [LifeJourneyStatItem] = [],
+        onSave: @escaping (LifeJourneyStatItem) -> Void
+    ) {
         self.existing = existing
+        self.existingItems = existingItems
         self.onSave = onSave
     }
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                LifeTheme.subtleBackground.ignoresSafeArea()
-
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 18) {
-                        section("顯示名稱") {
-                            TextField("例如：出國旅行、讀過的書", text: $title)
-                                .textFieldStyle(.plain)
-                                .padding(14)
-                                .background(fieldBackground)
-                                .foregroundStyle(LifeTheme.textPrimary)
-                        }
-
-                        section("單位") {
-                            TextField("例如：天、次、本", text: $unit)
-                                .textFieldStyle(.plain)
-                                .padding(14)
-                                .background(fieldBackground)
-                                .foregroundStyle(LifeTheme.textPrimary)
-                        }
-
-                        section("圖示") {
-                            iconPicker
-                        }
-
-                        section("數據來源") {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Picker("Metric", selection: $metricKind) {
-                                    ForEach(LifeJourneyStatMetricKind.allCases) { kind in
-                                        Text(kind.displayName).tag(kind)
-                                    }
-                                }
-                                .pickerStyle(.menu)
-                                .tint(LifeTheme.accent)
-
-                                Text(metricKind.hint)
-                                    .font(.caption)
-                                    .foregroundStyle(LifeTheme.textTertiary)
-                            }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    section("顯示名稱") {
+                        TextField("例如：完成作品、運動", text: $title)
                             .padding(14)
-                            .frame(maxWidth: .infinity, alignment: .leading)
                             .background(fieldBackground)
-                        }
-
-                        if metricKind == .manual {
-                            section("目前數值") {
-                                TextField("0", text: $manualValueText)
-                                    .keyboardType(.numberPad)
-                                    .textFieldStyle(.plain)
-                                    .padding(14)
-                                    .background(fieldBackground)
-                                    .foregroundStyle(LifeTheme.textPrimary)
-                            }
-                        }
-
-                        Spacer(minLength: 24)
+                            .foregroundStyle(LifeTheme.textPrimary)
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 8)
+
+                    section("單位") {
+                        TextField("例如：次、本、場", text: $unit)
+                            .padding(14)
+                            .background(fieldBackground)
+                            .foregroundStyle(LifeTheme.textPrimary)
+                    }
+
+                    section("過去估算累積") {
+                        TextField("0", text: $baselineText)
+                            .keyboardType(.numberPad)
+                            .padding(14)
+                            .background(fieldBackground)
+                            .foregroundStyle(LifeTheme.textPrimary)
+                        Text("若尚未完成問卷，可手動填入過去大概的累積次數。")
+                            .font(.caption)
+                            .foregroundStyle(LifeTheme.textTertiary)
+                    }
+
+                    section("圖示") { iconPicker }
+
+                    Spacer(minLength: 24)
                 }
-                .scrollContentBackground(.hidden)
+                .padding(.horizontal)
+                .padding(.top, 8)
             }
+            .scrollContentBackground(.hidden)
+            .background(LifeTheme.subtleBackground.ignoresSafeArea())
             .navigationTitle(existing == nil ? "新增累積" : "編輯累積")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
@@ -100,18 +78,24 @@ struct AddLifeJourneyStatView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("儲存", action: save)
                         .foregroundStyle(LifeTheme.accent)
-                        .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .disabled(!canSave)
                 }
             }
             .onAppear(perform: applyExisting)
-            .onChange(of: metricKind) { _, newValue in
-                if existing == nil, unit == LifeJourneyStatMetricKind.daysLived.defaultUnit
-                    || LifeJourneyStatMetricKind.allCases.map(\.defaultUnit).contains(unit) {
-                    unit = newValue.defaultUnit
-                }
-            }
         }
         .preferredColorScheme(.dark)
+    }
+
+    private var canSave: Bool {
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return false }
+        if existing == nil {
+            return LifeJourneyStatItem.isTitleAvailable(trimmed, among: existingItems)
+        }
+        let duplicates = existingItems.filter {
+            !$0.isArchived && $0.title == trimmed && $0.id != existing?.id
+        }
+        return duplicates.isEmpty
     }
 
     private func applyExisting() {
@@ -119,10 +103,7 @@ struct AddLifeJourneyStatView: View {
         title = existing.title
         unit = existing.unit
         iconName = existing.iconName
-        metricKind = existing.metricKind
-        if let manualValue = existing.manualValue {
-            manualValueText = "\(manualValue)"
-        }
+        baselineText = "\(existing.baselineEstimate)"
     }
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
@@ -165,20 +146,18 @@ struct AddLifeJourneyStatView: View {
 
     private func save() {
         let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-
-        let manualValue = metricKind == .manual ? Int(manualValueText) : nil
-        let resolvedUnit = unit.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            ? metricKind.defaultUnit
-            : unit
+        guard canSave else { return }
 
         let item = LifeJourneyStatItem(
             id: existing?.id ?? UUID(),
             title: trimmed,
             iconName: iconName,
-            metricKind: metricKind,
-            unit: resolvedUnit,
-            manualValue: manualValue,
+            unit: unit.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "次" : unit,
+            baselineEstimate: max(0, Int(baselineText) ?? 0),
+            timesPerMonth: existing?.timesPerMonth,
+            timesPerYear: existing?.timesPerYear,
+            linkedMomentId: existing?.linkedMomentId,
+            template: existing?.template,
             createdAt: existing?.createdAt ?? Date(),
             isArchived: existing?.isArchived ?? false
         )
