@@ -26,12 +26,22 @@ enum AppConstants {
         static let onboarded = "onboarded"
         static let values = "values"
         static let isPremium = "isPremium"
+        static let familyMembers = "family-members"
+        static let familyMomentRecords = "family-moment-records"
     }
 }
 
 extension UserDefaults {
     static var shared: UserDefaults {
         UserDefaults(suiteName: AppConstants.appGroup) ?? .standard
+    }
+}
+
+extension DateFormatter {
+    static func dateKey(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
     }
 }
 
@@ -150,5 +160,99 @@ public enum LifeTheme {
     }
     public static var progressGradient: LinearGradient {
         LinearGradient(colors: [accent, accentEnd], startPoint: .leading, endPoint: .trailing)
+    }
+}
+
+// MARK: - Widget helpers
+
+private struct WidgetFamilyMember: Codable {
+    var id: UUID
+    var name: String
+    var isArchived: Bool
+}
+
+private struct WidgetFamilyMomentRecord: Codable {
+    var familyMemberId: UUID
+    var date: Date
+}
+
+private struct WidgetReflectionEntry: Codable {
+    var date: Date
+    var text: String
+}
+
+enum WidgetDataLoader {
+    static var isPremium: Bool {
+        UserDefaults.shared.bool(forKey: AppConstants.Key.isPremium)
+    }
+
+    static func dailyReflectionPrompt() -> String {
+        let fallback = "今天，你做了什麼讓未來的你感謝的事？"
+        guard
+            let data = UserDefaults.shared.data(forKey: "reflection-entries"),
+            let entries = try? JSONDecoder().decode([WidgetReflectionEntry].self, from: data)
+        else {
+            return fallback
+        }
+
+        let todayKey = DateFormatter.dateKey(for: Date())
+        if let entry = entries.first(where: {
+            DateFormatter.dateKey(for: $0.date) == todayKey &&
+            !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }) {
+            return entry.text
+        }
+        return fallback
+    }
+
+    static func longestNotContactedFamilyMember() -> (name: String, days: Int)? {
+        let decoder = JSONDecoder()
+        guard
+            let membersData = UserDefaults.shared.data(forKey: AppConstants.Key.familyMembers),
+            let members = try? decoder.decode([WidgetFamilyMember].self, from: membersData)
+        else {
+            return nil
+        }
+
+        let activeMembers = members.filter { !$0.isArchived }
+        guard !activeMembers.isEmpty else { return nil }
+
+        let records: [WidgetFamilyMomentRecord]
+        if let recordsData = UserDefaults.shared.data(forKey: AppConstants.Key.familyMomentRecords),
+           let decoded = try? decoder.decode([WidgetFamilyMomentRecord].self, from: recordsData) {
+            records = decoded
+        } else {
+            records = []
+        }
+
+        let calendar = Calendar.current
+        return activeMembers
+            .map { member in
+                let latestDate = records
+                    .filter { $0.familyMemberId == member.id }
+                    .map(\.date)
+                    .max()
+                let days = latestDate.map {
+                    max(0, calendar.dateComponents([.day], from: $0, to: Date()).day ?? 0)
+                } ?? 999
+                return (name: member.name, days: days)
+            }
+            .max { $0.days < $1.days }
+    }
+}
+
+struct WidgetLockedView: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Image(systemName: "lock.fill")
+                .foregroundStyle(LifeTheme.warm)
+            Text("完整版功能")
+                .font(.subheadline)
+                .foregroundStyle(LifeTheme.textPrimary)
+            Text("開啟 app 解鎖")
+                .font(.caption)
+                .foregroundStyle(LifeTheme.textSecondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 }

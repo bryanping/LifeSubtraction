@@ -39,11 +39,26 @@ final class LocalJSONStore {
 // 修改内容 — 集中管理 storage key，避免散落字串。
 enum StorageKey {
     static let lifeGoals               = "life-goals"
+    static let lifeValues              = AppConstants.Key.values
     static let regretItems             = "regret-avoidance-items"
     static let alignmentRecords        = "life-alignment-records"
     static let reflectionEntries       = "reflection-entries"
     static let remainingMomentItems    = "remaining-moment-items"
     static let remainingMomentRecords  = "remaining-moment-records"
+    static let personalEventItems      = remainingMomentItems
+    static let personalEventRecords    = remainingMomentRecords
+    static let legacyPersonalEventItems = "remaining-moment-items"
+    static let legacyPersonalEventRecords = "remaining-moment-records"
+    static let lifeJourneyStatItems    = "life-journey-stat-items"
+    static let familyMembers           = AppConstants.Key.familyMembers
+    static let familyMomentRecords     = AppConstants.Key.familyMomentRecords
+    static let legacyLifeGoals         = "life-goals"
+    static let legacyParentAge         = "parentAge"
+    static let legacyParentLifeExpectancy = "parentLifeExpectancy"
+
+    static func alignment(for date: Date = Date()) -> String {
+        "alignment-\(DateFormatter.dateKey(for: date))"
+    }
 
     /// 本週焦點 key：weekly-focus-yyyy-ww
     static func weeklyFocus(for date: Date = Date()) -> String {
