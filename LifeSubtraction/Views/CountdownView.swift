@@ -3,20 +3,21 @@ import SwiftUI
 struct CountdownView: View {
     @EnvironmentObject var store: LifeStore
 
-    @State private var flowUnit: TimeFlowUnit = .second
     @State private var remainingMomentItems: [RemainingMomentItem] = []
     @State private var deletingItem: RemainingMomentItem?
     @State private var showingAddMoment = false
+
+    private let momentColumns = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    timeFlowHero
-                        .padding(.horizontal)
-
-                    rhythmSection
-                        .padding(.horizontal)
+                    IntegratedTimeFlowCard(
+                        birthday: store.birthday,
+                        lifeExpectancy: store.lifeExpectancy
+                    )
+                    .padding(.horizontal)
 
                     remainingMomentsSection
                         .padding(.horizontal)
@@ -62,97 +63,7 @@ struct CountdownView: View {
         }
     }
 
-    // MARK: - Time Flow Hero
-
-    var timeFlowHero: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("時間正在流動")
-                .font(.subheadline)
-                .foregroundStyle(LifeTheme.textSecondary)
-
-            Picker("單位", selection: $flowUnit) {
-                ForEach(TimeFlowUnit.allCases) { unit in
-                    Text(unit.title).tag(unit)
-                }
-            }
-            .pickerStyle(.segmented)
-
-            TimelineView(.periodic(from: Date(), by: flowUnit.tickInterval)) { context in
-                let metrics = LifeMetrics(
-                    birthday: store.birthday,
-                    lifeExpectancy: store.lifeExpectancy,
-                    now: context.date
-                )
-
-                Group {
-                    if flowUnit == .second {
-                        FlipSecondsDisplay(value: Int(metrics.secondsRemaining))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    } else {
-                        Text(flowUnit.displayText(metrics: metrics))
-                            .font(.system(size: 34, weight: .light, design: .rounded))
-                            .foregroundStyle(LifeTheme.textPrimary)
-                            .monospacedDigit()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
-            }
-
-            Text("剩餘人生的連續刻度，持續變動中。")
-                .font(.caption)
-                .foregroundStyle(LifeTheme.textTertiary)
-        }
-        .cardStyle()
-    }
-
-    // MARK: - Rhythm
-
-    var rhythmSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("時間節奏")
-                .font(.headline)
-                .foregroundStyle(LifeTheme.textPrimary)
-
-            TimelineView(.periodic(from: Date(), by: 30)) { context in
-                let metrics = LifeMetrics(
-                    birthday: store.birthday,
-                    lifeExpectancy: store.lifeExpectancy,
-                    now: context.date
-                )
-
-                VStack(spacing: 14) {
-                    RhythmProgressRow(
-                        title: "本年已過",
-                        progress: metrics.progressOfCurrentYear,
-                        tint: LifeTheme.warm
-                    )
-                    RhythmProgressRow(
-                        title: "本週已過",
-                        progress: metrics.progressOfCurrentWeek,
-                        tint: LifeTheme.accent
-                    )
-                    RhythmProgressRow(
-                        title: "今天已過",
-                        progress: metrics.progressOfCurrentDay,
-                        tint: LifeTheme.accentEnd
-                    )
-
-                    HStack(spacing: 8) {
-                        Image(systemName: "sun.horizon.fill")
-                            .font(.caption)
-                            .foregroundStyle(LifeTheme.accent)
-                        Text(String(format: "今天還剩 %.1f 小時", metrics.hoursRemainingToday))
-                            .font(.subheadline)
-                            .foregroundStyle(LifeTheme.textSecondary)
-                            .monospacedDigit()
-                    }
-                }
-            }
-        }
-        .cardStyle()
-    }
-
-    // MARK: - Remaining Moments
+    // MARK: - Remaining Moments（一排兩個）
 
     var remainingMomentsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -181,10 +92,10 @@ struct CountdownView: View {
                 .frame(maxWidth: .infinity)
                 .cardStyle(padding: 20)
             } else {
-                VStack(spacing: 12) {
+                LazyVGrid(columns: momentColumns, spacing: 12) {
                     ForEach(activeRemainingMomentItems) { item in
                         NavigationLink(value: item) {
-                            momentCard(for: item)
+                            momentGridCell(for: item)
                         }
                         .buttonStyle(.plain)
                         .contextMenu {
@@ -202,39 +113,44 @@ struct CountdownView: View {
         remainingMomentItems.filter { !$0.isArchived }
     }
 
-    func momentCard(for item: RemainingMomentItem) -> some View {
+    func momentGridCell(for item: RemainingMomentItem) -> some View {
         let remaining = item.estimatedRemainingOccurrences(store: store, metrics: store.metrics)
 
-        return VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
-                Image(systemName: item.iconName)
-                    .foregroundStyle(LifeTheme.accent)
-                Text(item.title)
-                    .font(.headline)
-                    .foregroundStyle(LifeTheme.textPrimary)
-                Spacer()
-            }
+        return VStack(alignment: .leading, spacing: 8) {
+            Image(systemName: item.iconName)
+                .font(.caption)
+                .foregroundStyle(LifeTheme.accent)
 
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text("約剩")
-                    .font(.subheadline)
-                    .foregroundStyle(LifeTheme.textSecondary)
+            Text(item.title)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(LifeTheme.textPrimary)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text("\(remaining.formatted())")
-                    .font(.system(size: 32, weight: .light, design: .rounded))
+                    .font(.system(.title3, design: .rounded).weight(.semibold))
                     .foregroundStyle(LifeTheme.warm)
                 Text(item.unit)
-                    .font(.subheadline)
-                    .foregroundStyle(LifeTheme.textSecondary)
+                    .font(.caption)
+                    .foregroundStyle(LifeTheme.textTertiary)
             }
 
             Text(item.frequency.displayName)
-                .font(.caption)
-                .foregroundStyle(LifeTheme.textTertiary)
+                .font(.caption2)
+                .foregroundStyle(LifeTheme.textQuaternary)
         }
-        .cardStyle(padding: 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(LifeTheme.glassFill)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(LifeTheme.glassBorder, lineWidth: 0.5)
+        )
     }
-
-    // MARK: - Journey bindings for detail sync
 
     private var journeyStatsBinding: Binding<[LifeJourneyStatItem]> {
         Binding(

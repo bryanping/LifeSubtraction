@@ -311,6 +311,7 @@ struct SettingsView: View {
             StorageKey.remainingMomentRecords,
             StorageKey.lifeJourneyStatItems,
             StorageKey.lifeJourneyStatRecords,
+            StorageKey.lifeMoments,
             JourneyStatsBootstrap.questionnaireDoneKey,
             "parentAge",
             "parentLifeExpectancy",

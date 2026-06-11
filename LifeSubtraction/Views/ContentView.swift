@@ -33,7 +33,7 @@ struct ContentView: View {
                     CountdownView()
                 //        .premiumGate()
                         .tabItem { Label("倒數", systemImage: "hourglass") }
-                    ValuesView()
+                    LifeGoalsView()
                 //        .premiumGate()
                         .tabItem { Label("人生目標", systemImage: "target") }
                     SettingsView()

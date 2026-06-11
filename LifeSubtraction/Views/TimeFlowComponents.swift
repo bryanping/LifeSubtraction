@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 // MARK: - Overview Hero
@@ -61,63 +62,54 @@ struct LifeRemainingRing: View {
     }
 }
 
-// MARK: - Countdown Time Flow
+// MARK: - Countdown Time Flow（年 / 月 / 週 / 時）
 
-enum TimeFlowUnit: String, CaseIterable, Identifiable {
-    case year, month, week, day, hour, minute, second
+enum TimeFlowUnit: CaseIterable, Identifiable, Equatable {
+    case year, month, week, hour
 
-    var id: String { rawValue }
+    var id: Self { self }
 
     var title: String {
         switch self {
-        case .year:   return "年"
-        case .month:  return "月"
-        case .week:   return "週"
-        case .day:    return "日"
-        case .hour:   return "時"
-        case .minute: return "分"
-        case .second: return "秒"
+        case .year:  return "年"
+        case .month: return "月"
+        case .week:  return "週"
+        case .hour:  return "時"
         }
     }
 
-    func displayText(metrics: LifeMetrics) -> String {
+    var subtitle: String {
+        switch self {
+        case .year:  return "剩餘人生 · 年"
+        case .month: return "剩餘人生 · 月"
+        case .week:  return "剩餘人生 · 週"
+        case .hour:  return "剩餘人生 · 時"
+        }
+    }
+
+    func displayValue(metrics: LifeMetrics) -> String {
         switch self {
         case .year:
-            return String(format: "%.4f 年", metrics.yearsRemainingPrecise)
+            return String(format: "%.4f", metrics.yearsRemainingPrecise)
         case .month:
-            return String(format: "%.3f 月", metrics.monthsRemainingPrecise)
+            return String(format: "%.3f", metrics.monthsRemainingPrecise)
         case .week:
-            return String(format: "%.2f 週", metrics.weeksRemainingPrecise)
-        case .day:
-            return "\(metrics.daysRemaining.formatted()) 天"
+            return String(format: "%.2f", metrics.weeksRemainingPrecise)
         case .hour:
-            return String(format: "%.1f 小時", metrics.hoursRemaining)
-        case .minute:
-            return String(format: "%.0f 分", metrics.minutesRemaining)
-        case .second:
-            return "\(Int(metrics.secondsRemaining).formatted())"
+            return String(format: "%.1f", metrics.hoursRemaining)
         }
     }
 
-    var tickInterval: TimeInterval {
-        switch self {
-        case .second: return 1
-        case .minute: return 1
-        default:      return 0.25
-        }
+    func next() -> TimeFlowUnit {
+        let all = Self.allCases
+        guard let index = all.firstIndex(of: self) else { return .year }
+        return all[(index + 1) % all.count]
     }
-}
 
-struct FlipSecondsDisplay: View {
-    let value: Int
-
-    var body: some View {
-        Text(value.formatted(.number.grouping(.automatic)))
-            .font(.system(size: 34, weight: .light, design: .rounded))
-            .foregroundStyle(LifeTheme.warm)
-            .monospacedDigit()
-            .contentTransition(.numericText())
-            .animation(.snappy(duration: 0.35), value: value)
+    func previous() -> TimeFlowUnit {
+        let all = Self.allCases
+        guard let index = all.firstIndex(of: self) else { return .year }
+        return all[(index + all.count - 1) % all.count]
     }
 }
 
@@ -139,6 +131,145 @@ struct RhythmProgressRow: View {
                     .monospacedDigit()
             }
             ProgressBar(value: progress, color: tint, useGradient: false)
+        }
+    }
+}
+
+// MARK: - 整合：時間流動 + 時間節奏
+
+struct IntegratedTimeFlowCard: View {
+    let birthday: Date
+    let lifeExpectancy: Int
+
+    @State private var unit: TimeFlowUnit = .year
+    @State private var dragOffset: CGFloat = 0
+    @State private var autoTimer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Text("時間正在流動")
+                    .font(.subheadline)
+                    .foregroundStyle(LifeTheme.textSecondary)
+                Spacer()
+                unitIndicator
+            }
+
+            flowValueArea
+
+            Rectangle()
+                .fill(Color.white.opacity(0.08))
+                .frame(height: 0.5)
+
+            rhythmArea
+        }
+        .cardStyle()
+        .onReceive(autoTimer) { _ in
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.82)) {
+                unit = unit.next()
+            }
+        }
+    }
+
+    private var unitIndicator: some View {
+        HStack(spacing: 6) {
+            ForEach(TimeFlowUnit.allCases) { item in
+                Capsule()
+                    .fill(item == unit ? LifeTheme.accent : Color.white.opacity(0.15))
+                    .frame(width: item == unit ? 18 : 6, height: 6)
+                    .animation(.spring(response: 0.35), value: unit)
+            }
+        }
+    }
+
+    private var flowValueArea: some View {
+        TimelineView(.periodic(from: Date(), by: 0.25)) { context in
+            let metrics = LifeMetrics(
+                birthday: birthday,
+                lifeExpectancy: lifeExpectancy,
+                now: context.date
+            )
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(unit.subtitle)
+                    .font(.caption)
+                    .foregroundStyle(LifeTheme.textTertiary)
+
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(unit.displayValue(metrics: metrics))
+                        .font(.system(size: 40, weight: .light, design: .rounded))
+                        .foregroundStyle(LifeTheme.textPrimary)
+                        .monospacedDigit()
+                        .contentTransition(.numericText())
+                        .offset(x: dragOffset * 0.15)
+                        .animation(.snappy, value: unit)
+
+                    Text(unit.title)
+                        .font(.title3)
+                        .foregroundStyle(LifeTheme.warm)
+                }
+
+                Text("左右滑動切換 · 每 5 秒自動輪播")
+                    .font(.caption2)
+                    .foregroundStyle(LifeTheme.textQuaternary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 24)
+                    .onChanged { value in
+                        dragOffset = value.translation.width
+                    }
+                    .onEnded { value in
+                        let threshold: CGFloat = 50
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                            if value.translation.width < -threshold {
+                                unit = unit.next()
+                            } else if value.translation.width > threshold {
+                                unit = unit.previous()
+                            }
+                            dragOffset = 0
+                        }
+                    }
+            )
+        }
+    }
+
+    private var rhythmArea: some View {
+        TimelineView(.periodic(from: Date(), by: 30)) { context in
+            let metrics = LifeMetrics(
+                birthday: birthday,
+                lifeExpectancy: lifeExpectancy,
+                now: context.date
+            )
+
+            VStack(spacing: 14) {
+                RhythmProgressRow(
+                    title: "本年已過",
+                    progress: metrics.progressOfCurrentYear,
+                    tint: LifeTheme.warm
+                )
+                RhythmProgressRow(
+                    title: "本週已過",
+                    progress: metrics.progressOfCurrentWeek,
+                    tint: LifeTheme.accent
+                )
+                RhythmProgressRow(
+                    title: "今天已過",
+                    progress: metrics.progressOfCurrentDay,
+                    tint: LifeTheme.accentEnd
+                )
+
+                HStack(spacing: 8) {
+                    Image(systemName: "sun.horizon.fill")
+                        .font(.caption)
+                        .foregroundStyle(LifeTheme.accent)
+                    Text(String(format: "今天還剩 %.1f 小時", metrics.hoursRemainingToday))
+                        .font(.subheadline)
+                        .foregroundStyle(LifeTheme.textSecondary)
+                        .monospacedDigit()
+                }
+            }
         }
     }
 }

@@ -39,6 +39,7 @@ final class LocalJSONStore {
 // 修改内容 — 集中管理 storage key，避免散落字串。
 enum StorageKey {
     static let lifeGoals               = "life-goals"
+    static let lifeMoments             = "life-moments"
     static let lifeValues              = AppConstants.Key.values
     static let regretItems             = "regret-avoidance-items"
     static let alignmentRecords        = "life-alignment-records"
