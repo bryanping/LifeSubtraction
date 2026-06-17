@@ -40,6 +40,9 @@ final class LocalJSONStore {
 enum StorageKey {
     static let lifeGoals               = "life-goals"
     static let lifeMoments             = "life-moments"
+    static let goalCatalogAdoptionCounts = "goal-catalog-adoption-counts"
+    static let goalDetailCustomOptions   = "goal-detail-custom-options"
+    static let goalDetailSharedPresets     = "goal-detail-shared-presets"
     static let lifeValues              = AppConstants.Key.values
     static let regretItems             = "regret-avoidance-items"
     static let alignmentRecords        = "life-alignment-records"

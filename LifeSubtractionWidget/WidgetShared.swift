@@ -80,19 +80,30 @@ public struct LifeMetrics: Equatable, Sendable {
 
     public var progressOfCurrentYear: Double {
         let cal = Calendar.current
-        guard let start = cal.date(byAdding: .year, value: ageYears, to: birthday),
-              let end = cal.date(byAdding: .year, value: ageYears + 1, to: birthday) else { return 0 }
-        let total = end.timeIntervalSince(start)
+        guard let interval = cal.dateInterval(of: .year, for: now) else { return 0 }
+        let total = interval.end.timeIntervalSince(interval.start)
         guard total > 0 else { return 0 }
-        return min(1.0, max(0.0, now.timeIntervalSince(start) / total))
+        return min(1.0, max(0.0, now.timeIntervalSince(interval.start) / total))
     }
 
     public var progressOfCurrentWeek: Double {
         let cal = Calendar.current
-        guard let start = cal.date(byAdding: .day, value: weeksLived * 7, to: birthday) else { return 0 }
-        let elapsed = now.timeIntervalSince(start)
-        let weekSeconds: TimeInterval = 7 * 86_400
-        return min(1.0, max(0.0, elapsed / weekSeconds))
+        guard let interval = cal.dateInterval(of: .weekOfYear, for: now) else { return 0 }
+        let total = interval.end.timeIntervalSince(interval.start)
+        guard total > 0 else { return 0 }
+        return min(1.0, max(0.0, now.timeIntervalSince(interval.start) / total))
+    }
+
+    public var progressOfCurrentMonth: Double {
+        let cal = Calendar.current
+        let components = cal.dateComponents([.year, .month], from: now)
+        guard
+            let start = cal.date(from: components),
+            let end = cal.date(byAdding: .month, value: 1, to: start)
+        else { return 0 }
+        let total = end.timeIntervalSince(start)
+        guard total > 0 else { return 0 }
+        return min(1.0, max(0.0, now.timeIntervalSince(start) / total))
     }
 
     public var progressOfCurrentDay: Double {
@@ -102,6 +113,12 @@ public struct LifeMetrics: Equatable, Sendable {
         let total = end.timeIntervalSince(start)
         guard total > 0 else { return 0 }
         return min(1.0, max(0.0, now.timeIntervalSince(start) / total))
+    }
+
+    public var hoursElapsedToday: Double {
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: now)
+        return max(0, now.timeIntervalSince(start) / 3_600)
     }
 
     public var expectedEndDate: Date {

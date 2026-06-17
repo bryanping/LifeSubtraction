@@ -95,6 +95,10 @@ struct LifeGoal: Identifiable, Codable, Hashable {
     var stages: [GoalStage]
     var reminderIdentifier: String?
     var catalogId: String?
+    var detailSelections: [GoalDetailSelection]
+    var dueDate: Date?
+    var originalDueDate: Date?
+    var extensionCount: Int
     var createdAt: Date
 
     init(
@@ -108,6 +112,10 @@ struct LifeGoal: Identifiable, Codable, Hashable {
         stages: [GoalStage]? = nil,
         reminderIdentifier: String? = nil,
         catalogId: String? = nil,
+        detailSelections: [GoalDetailSelection]? = nil,
+        dueDate: Date? = nil,
+        originalDueDate: Date? = nil,
+        extensionCount: Int = 0,
         createdAt: Date = Date()
     ) {
         self.id = id
@@ -117,10 +125,89 @@ struct LifeGoal: Identifiable, Codable, Hashable {
         self.completedDate = completedDate
         self.notes = notes
         self.status = status
-        self.stages = stages ?? category.defaultStageTitles.map { GoalStage(title: $0) }
+        self.stages = stages ?? GoalStageGenerator.makeStages(catalogId: catalogId, title: title, category: category)
         self.reminderIdentifier = reminderIdentifier
         self.catalogId = catalogId
+        self.detailSelections = detailSelections ?? GoalDetailOptions.defaultSelections(for: catalogId)
+        self.dueDate = dueDate
+        self.originalDueDate = originalDueDate ?? dueDate
+        self.extensionCount = extensionCount
         self.createdAt = createdAt
+    }
+
+    var isDueDateLocked: Bool {
+        dueDate != nil && originalDueDate != nil
+    }
+
+    var daysUntilDue: Int? {
+        guard let dueDate else { return nil }
+        let cal = Calendar.current
+        return cal.dateComponents(
+            [.day],
+            from: cal.startOfDay(for: Date()),
+            to: cal.startOfDay(for: dueDate)
+        ).day
+    }
+
+    var isOverdue: Bool {
+        guard let days = daysUntilDue else { return false }
+        return days < 0 && status == .active
+    }
+
+    var detailSummary: String {
+        detailSelections
+            .map(\.selectedValue)
+            .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            .joined(separator: " · ")
+    }
+
+    var displayTitle: String {
+        let summary = detailSummary
+        return summary.isEmpty ? title : "\(title)（\(summary)）"
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, category, startDate, completedDate, notes, status, stages
+        case reminderIdentifier, catalogId, detailSelections, dueDate, originalDueDate, extensionCount, createdAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        category = try container.decode(GoalCategory.self, forKey: .category)
+        startDate = try container.decodeIfPresent(Date.self, forKey: .startDate)
+        completedDate = try container.decodeIfPresent(Date.self, forKey: .completedDate)
+        notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
+        status = try container.decode(GoalStatus.self, forKey: .status)
+        stages = try container.decode([GoalStage].self, forKey: .stages)
+        reminderIdentifier = try container.decodeIfPresent(String.self, forKey: .reminderIdentifier)
+        catalogId = try container.decodeIfPresent(String.self, forKey: .catalogId)
+        detailSelections = try container.decodeIfPresent([GoalDetailSelection].self, forKey: .detailSelections)
+            ?? GoalDetailOptions.defaultSelections(for: catalogId)
+        dueDate = try container.decodeIfPresent(Date.self, forKey: .dueDate)
+        originalDueDate = try container.decodeIfPresent(Date.self, forKey: .originalDueDate) ?? dueDate
+        extensionCount = try container.decodeIfPresent(Int.self, forKey: .extensionCount) ?? 0
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(category, forKey: .category)
+        try container.encodeIfPresent(startDate, forKey: .startDate)
+        try container.encodeIfPresent(completedDate, forKey: .completedDate)
+        try container.encode(notes, forKey: .notes)
+        try container.encode(status, forKey: .status)
+        try container.encode(stages, forKey: .stages)
+        try container.encodeIfPresent(reminderIdentifier, forKey: .reminderIdentifier)
+        try container.encodeIfPresent(catalogId, forKey: .catalogId)
+        try container.encode(detailSelections, forKey: .detailSelections)
+        try container.encodeIfPresent(dueDate, forKey: .dueDate)
+        try container.encodeIfPresent(originalDueDate, forKey: .originalDueDate)
+        try container.encode(extensionCount, forKey: .extensionCount)
+        try container.encode(createdAt, forKey: .createdAt)
     }
 
     var completedStageCount: Int { stages.filter(\.isDone).count }
@@ -149,7 +236,7 @@ struct LifeGoal: Identifiable, Codable, Hashable {
     }
 
     func shareText() -> String {
-        var lines = ["我完成了：", title, ""]
+        var lines = ["我完成了：", displayTitle, ""]
         if !notes.isEmpty { lines.append("備註：\(notes)") }
         if let start = startDate, let end = completedDate {
             let formatter = DateFormatter()

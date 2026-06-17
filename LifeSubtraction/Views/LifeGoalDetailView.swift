@@ -1,12 +1,22 @@
 import SwiftUI
 
+struct GoalRoute: Hashable {
+    let goalId: UUID
+    let startInEditMode: Bool
+}
+
 struct LifeGoalDetailView: View {
+    @Environment(\.dismiss) private var dismiss
+
     @Binding var goals: [LifeGoal]
     @Binding var moments: [LifeMoment]
     let goalId: UUID
+    var startInEditMode: Bool = false
 
     @State private var showCompletionSheet = false
+    @State private var showDeleteConfirm = false
     @State private var remindersEnabled = false
+    @State private var isEditingStages = false
 
     private var goalIndex: Int? {
         goals.firstIndex { $0.id == goalId }
@@ -22,8 +32,46 @@ struct LifeGoalDetailView: View {
             }
         }
         .background(LifeTheme.subtleBackground.ignoresSafeArea())
-        .navigationTitle(goals.first(where: { $0.id == goalId })?.title ?? "人生目標")
+        .navigationTitle(goals.first(where: { $0.id == goalId })?.displayTitle ?? "人生目標")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if goals.first(where: { $0.id == goalId })?.status == .active {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button {
+                            withAnimation(.snappy) { isEditingStages.toggle() }
+                        } label: {
+                            Label(isEditingStages ? "完成編輯步驟" : "編輯步驟", systemImage: "list.bullet")
+                        }
+                        Button(role: .destructive) {
+                            showDeleteConfirm = true
+                        } label: {
+                            Label("刪除目標", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                            .foregroundStyle(LifeTheme.accent)
+                    }
+                }
+            }
+        }
+        .confirmationDialog(
+            "確定刪除此進行中的目標？",
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("刪除", role: .destructive) {
+                deleteGoal()
+            }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("刪除後無法復原，相關提醒也會一併移除。")
+        }
+        .onAppear {
+            if startInEditMode {
+                isEditingStages = true
+            }
+        }
         .sheet(isPresented: $showCompletionSheet) {
             if let completed = goals.first(where: { $0.id == goalId && $0.status == .completed }) {
                 GoalCompletionSheet(
@@ -44,8 +92,19 @@ struct LifeGoalDetailView: View {
 
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                header(goal)
+                detailConfigurator(index: index, goal: goal)
                 stagesSection(index: index, goal: goal)
+
+                if goal.status == .active {
+                    GoalDueDateSection(
+                        dueDate: $goals[index].dueDate,
+                        originalDueDate: $goals[index].originalDueDate,
+                        extensionCount: $goals[index].extensionCount,
+                        isEditable: true,
+                        onUpdate: saveGoals
+                    )
+                }
+
                 notesSection(index: index)
 
                 if goal.status == .active {
@@ -73,58 +132,62 @@ struct LifeGoalDetailView: View {
         }
     }
 
-    func header(_ goal: LifeGoal) -> some View {
+    func detailConfigurator(index: Int, goal: LifeGoal) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
-                Image(systemName: goal.category.iconName)
-                    .foregroundStyle(LifeTheme.accent)
-                Text(goal.category.displayName)
-                    .font(.caption)
-                    .foregroundStyle(LifeTheme.textTertiary)
+            GoalDetailConfiguratorView(
+                catalogId: goal.catalogId,
+                selections: $goals[index].detailSelections,
+                isEditable: goal.status == .active
+            ) {
+                saveGoals()
             }
 
             if goal.status == .completed {
                 Label("已完成", systemImage: "checkmark.seal.fill")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.green)
-            } else {
-                Text("階段式完成")
-                    .font(.subheadline)
-                    .foregroundStyle(LifeTheme.textSecondary)
+                    .padding(.horizontal, 4)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .cardStyle(padding: 16)
     }
 
     func stagesSection(index: Int, goal: LifeGoal) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("進度")
-                .font(.headline)
-                .foregroundStyle(LifeTheme.textPrimary)
-
-            ForEach(goal.stages) { stage in
-                Button {
-                    guard goals[index].status == .active else { return }
-                    goals[index].toggleStage(stage.id)
+        Group {
+            if isEditingStages && goal.status == .active {
+                GoalStagesEditor(stages: $goals[index].stages) {
                     saveGoals()
-                } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: stage.isDone ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(stage.isDone ? LifeTheme.accent : LifeTheme.textTertiary)
-                        Text(stage.title)
-                            .font(.subheadline)
-                            .foregroundStyle(stage.isDone ? LifeTheme.textSecondary : LifeTheme.textPrimary)
-                            .strikethrough(stage.isDone)
-                        Spacer()
-                    }
-                    .padding(.vertical, 8)
                 }
-                .buttonStyle(.plain)
-                .disabled(goals[index].status != .active)
+                .cardStyle()
+            } else {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("進度")
+                        .font(.headline)
+                        .foregroundStyle(LifeTheme.textPrimary)
+
+                    ForEach(goal.stages) { stage in
+                        Button {
+                            guard goals[index].status == .active else { return }
+                            goals[index].toggleStage(stage.id)
+                            saveGoals()
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: stage.isDone ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(stage.isDone ? LifeTheme.accent : LifeTheme.textTertiary)
+                                Text(stage.title)
+                                    .font(.subheadline)
+                                    .foregroundStyle(stage.isDone ? LifeTheme.textSecondary : LifeTheme.textPrimary)
+                                    .strikethrough(stage.isDone)
+                                Spacer()
+                            }
+                            .padding(.vertical, 8)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(goals[index].status != .active)
+                    }
+                }
+                .cardStyle()
             }
         }
-        .cardStyle()
     }
 
     func notesSection(index: Int) -> some View {
@@ -220,8 +283,23 @@ struct LifeGoalDetailView: View {
         showCompletionSheet = true
     }
 
+    func deleteGoal() {
+        guard let index = goalIndex else { return }
+        RemindersManager.shared.removeReminder(identifier: goals[index].reminderIdentifier)
+        goals.remove(at: index)
+        saveGoals()
+        dismiss()
+    }
+
     func addSuggestedGoal(title: String, category: GoalCategory) {
-        goals.insert(LifeGoal(title: title, category: category), at: 0)
+        goals.insert(
+            LifeGoal(
+                title: title,
+                category: category,
+                stages: GoalStageGenerator.makeStages(catalogId: nil, title: title, category: category)
+            ),
+            at: 0
+        )
         saveGoals()
     }
 

@@ -3,11 +3,12 @@ import SwiftUI
 struct GoalCatalogView: View {
     @Environment(\.dismiss) private var dismiss
 
-    let adoptedCatalogIds: Set<String>
+    let goals: [LifeGoal]
     let onAdopt: (GoalCatalogEntry) -> Void
 
     @State private var selectedCategory: GoalCategory?
     @State private var searchText = ""
+    @State private var sortMode: GoalCatalogStats.SortMode = .popular
 
     private var filtered: [GoalCatalogEntry] {
         var list = GoalCatalog.all
@@ -17,13 +18,14 @@ struct GoalCatalogView: View {
         if !searchText.isEmpty {
             list = list.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
         }
-        return list
+        return GoalCatalogStats.sorted(list, mode: sortMode, goals: goals)
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    sortPicker
                     categoryChips
 
                     Text("共 \(GoalCatalog.all.count) 個人生事件靈感")
@@ -49,6 +51,15 @@ struct GoalCatalogView: View {
                 }
             }
         }
+    }
+
+    private var sortPicker: some View {
+        Picker("排序", selection: $sortMode) {
+            ForEach(GoalCatalogStats.SortMode.allCases) { mode in
+                Text(mode.rawValue).tag(mode)
+            }
+        }
+        .pickerStyle(.segmented)
     }
 
     var categoryChips: some View {
@@ -80,7 +91,8 @@ struct GoalCatalogView: View {
     }
 
     func catalogRow(_ entry: GoalCatalogEntry) -> some View {
-        let adopted = adoptedCatalogIds.contains(entry.id)
+        let myCount = GoalCatalogStats.userCompletedCount(catalogId: entry.id, goals: goals)
+        let globalCount = GoalCatalogStats.globalAdoptionCount(catalogId: entry.id)
 
         return HStack(spacing: 12) {
             Image(systemName: entry.category.iconName)
@@ -94,21 +106,23 @@ struct GoalCatalogView: View {
                 Text(entry.category.displayName)
                     .font(.caption2)
                     .foregroundStyle(LifeTheme.textTertiary)
+                HStack(spacing: 8) {
+                    Text("你已完成 \(myCount) 次")
+                    Text("·")
+                    Text("已被添加 \(globalCount) 次")
+                }
+                .font(.caption2)
+                .foregroundStyle(LifeTheme.textQuaternary)
             }
 
             Spacer()
 
-            if adopted {
-                Text("已加入")
-                    .font(.caption2)
-                    .foregroundStyle(LifeTheme.textTertiary)
-            } else {
-                Button("加入") {
-                    onAdopt(entry)
-                }
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(LifeTheme.accent)
+            Button("加入") {
+                onAdopt(entry)
+                dismiss()
             }
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(LifeTheme.accent)
         }
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 14).fill(LifeTheme.glassFill))

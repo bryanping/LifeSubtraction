@@ -7,11 +7,11 @@ struct GoalCatalogEntry: Identifiable, Hashable {
     let stageTitles: [String]?
 
     func makeGoal() -> LifeGoal {
-        let stages = (stageTitles ?? category.defaultStageTitles).map { GoalStage(title: $0) }
+        let titles = stageTitles ?? GoalStageGenerator.titles(catalogId: id, title: title, category: category)
         return LifeGoal(
             title: title,
             category: category,
-            stages: stages,
+            stages: titles.map { GoalStage(title: $0) },
             catalogId: id
         )
     }

@@ -5,15 +5,10 @@ struct LifeGoalsView: View {
     @State private var moments: [LifeMoment] = []
     @State private var showingCatalog = false
     @State private var showingAddCustom = false
-    @State private var customTitle = ""
-    @State private var customCategory: GoalCategory = .growth
-
-    private var adoptedCatalogIds: Set<String> {
-        Set(activeGoals.compactMap(\.catalogId))
-    }
+    @State private var navigationPath = NavigationPath()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     heroIntro
@@ -55,12 +50,25 @@ struct LifeGoalsView: View {
                 loadData()
             }
             .sheet(isPresented: $showingCatalog) {
-                GoalCatalogView(adoptedCatalogIds: adoptedCatalogIds) { entry in
+                GoalCatalogView(goals: activeGoals) { entry in
                     adoptCatalogEntry(entry)
                 }
             }
             .sheet(isPresented: $showingAddCustom) {
-                addCustomSheet
+                GoalSetupView { goal in
+                    activeGoals.insert(goal, at: 0)
+                    saveGoals()
+                    showingAddCustom = false
+                    navigationPath.append(GoalRoute(goalId: goal.id, startInEditMode: false))
+                }
+            }
+            .navigationDestination(for: GoalRoute.self) { route in
+                LifeGoalDetailView(
+                    goals: $activeGoals,
+                    moments: $moments,
+                    goalId: route.goalId,
+                    startInEditMode: route.startInEditMode
+                )
             }
             .navigationDestination(for: UUID.self) { goalId in
                 LifeGoalDetailView(
@@ -146,9 +154,20 @@ struct LifeGoalsView: View {
                     .foregroundStyle(LifeTheme.warm)
             }
 
-            Text(goal.title)
+            Text(goal.displayTitle)
                 .font(.headline)
                 .foregroundStyle(LifeTheme.textPrimary)
+                .lineLimit(2)
+
+            if let days = goal.daysUntilDue {
+                HStack(spacing: 4) {
+                    Image(systemName: goal.isOverdue ? "exclamationmark.triangle.fill" : "calendar")
+                        .font(.caption2)
+                    Text(days < 0 ? "已逾期 \(abs(days)) 天" : (days == 0 ? "今天到期" : "還剩 \(days) 天"))
+                        .font(.caption2)
+                }
+                .foregroundStyle(goal.isOverdue ? Color.red.opacity(0.85) : LifeTheme.textTertiary)
+            }
 
             ProgressBar(
                 value: goal.stages.isEmpty ? 0 : Double(goal.completedStageCount) / Double(goal.stages.count),
@@ -187,49 +206,15 @@ struct LifeGoalsView: View {
         .cardStyle(padding: 16)
     }
 
-    var addCustomSheet: some View {
-        NavigationStack {
-            Form {
-                Section("事件名稱") {
-                    TextField("例如：讀一本書", text: $customTitle)
-                }
-                Section("分類") {
-                    Picker("分類", selection: $customCategory) {
-                        ForEach(GoalCategory.allCases) { cat in
-                            Text(cat.displayName).tag(cat)
-                        }
-                    }
-                }
-            }
-            .navigationTitle("自訂人生事件")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("取消") {
-                        showingAddCustom = false
-                        customTitle = ""
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("加入") {
-                        guard !customTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-                        activeGoals.insert(
-                            LifeGoal(title: customTitle, category: customCategory),
-                            at: 0
-                        )
-                        saveGoals()
-                        showingAddCustom = false
-                        customTitle = ""
-                    }
-                }
-            }
-        }
-    }
-
     func adoptCatalogEntry(_ entry: GoalCatalogEntry) {
-        guard !adoptedCatalogIds.contains(entry.id) else { return }
-        activeGoals.insert(entry.makeGoal(), at: 0)
+        let goal = entry.makeGoal()
+        GoalCatalogStats.recordAdoption(catalogId: entry.id)
+        activeGoals.insert(goal, at: 0)
         saveGoals()
+        showingCatalog = false
+        DispatchQueue.main.async {
+            navigationPath.append(GoalRoute(goalId: goal.id, startInEditMode: true))
+        }
     }
 
     func shareText(for moment: LifeMoment) -> String {

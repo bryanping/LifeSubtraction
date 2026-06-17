@@ -84,22 +84,31 @@ public struct LifeMetrics: Equatable, Sendable {
     public var totalWeeks: Int { totalDays / 7 }
     public var weeksRemaining: Int { max(0, totalWeeks - weeksLived) }
 
-    // MARK: - 當前節奏進度（0...1）
+    // MARK: - 當前節奏進度（0...1，依日曆年月週日計算）
 
     public var progressOfCurrentYear: Double {
-        guard let start = calendar.date(byAdding: .year, value: ageYears, to: birthday),
-              let end = calendar.date(byAdding: .year, value: ageYears + 1, to: birthday)
+        guard let interval = calendar.dateInterval(of: .year, for: now) else { return 0 }
+        let total = interval.end.timeIntervalSince(interval.start)
+        guard total > 0 else { return 0 }
+        return min(1.0, max(0.0, now.timeIntervalSince(interval.start) / total))
+    }
+
+    public var progressOfCurrentWeek: Double {
+        guard let interval = calendar.dateInterval(of: .weekOfYear, for: now) else { return 0 }
+        let total = interval.end.timeIntervalSince(interval.start)
+        guard total > 0 else { return 0 }
+        return min(1.0, max(0.0, now.timeIntervalSince(interval.start) / total))
+    }
+
+    public var progressOfCurrentMonth: Double {
+        let components = calendar.dateComponents([.year, .month], from: now)
+        guard
+            let start = calendar.date(from: components),
+            let end = calendar.date(byAdding: .month, value: 1, to: start)
         else { return 0 }
         let total = end.timeIntervalSince(start)
         guard total > 0 else { return 0 }
         return min(1.0, max(0.0, now.timeIntervalSince(start) / total))
-    }
-
-    public var progressOfCurrentWeek: Double {
-        guard let start = calendar.date(byAdding: .day, value: weeksLived * 7, to: birthday) else { return 0 }
-        let elapsed = now.timeIntervalSince(start)
-        let weekSeconds: TimeInterval = 7 * 86_400
-        return min(1.0, max(0.0, elapsed / weekSeconds))
     }
 
     public var progressOfCurrentDay: Double {
@@ -108,6 +117,45 @@ public struct LifeMetrics: Equatable, Sendable {
         let total = end.timeIntervalSince(start)
         guard total > 0 else { return 0 }
         return min(1.0, max(0.0, now.timeIntervalSince(start) / total))
+    }
+
+    /// 本月已過天數（連續，含小數）。
+    public var daysElapsedThisMonth: Double {
+        let components = calendar.dateComponents([.year, .month], from: now)
+        guard let start = calendar.date(from: components) else { return 0 }
+        return max(0, now.timeIntervalSince(start) / 86_400)
+    }
+
+    /// 本月總天數。
+    public var daysInCurrentMonth: Int {
+        let components = calendar.dateComponents([.year, .month], from: now)
+        guard
+            let start = calendar.date(from: components),
+            let end = calendar.date(byAdding: .month, value: 1, to: start)
+        else { return 30 }
+        return calendar.dateComponents([.day], from: start, to: end).day ?? 30
+    }
+
+    /// 本月還剩天數（連續，含小數）。
+    public var daysRemainingThisMonth: Double {
+        max(0, Double(daysInCurrentMonth) - daysElapsedThisMonth)
+    }
+
+    /// 本週已過天數（連續，0…7）。
+    public var daysElapsedThisWeek: Double {
+        guard let interval = calendar.dateInterval(of: .weekOfYear, for: now) else { return 0 }
+        return max(0, now.timeIntervalSince(interval.start) / 86_400)
+    }
+
+    /// 本週還剩天數（連續，含小數）。
+    public var daysRemainingThisWeek: Double {
+        max(0, 7 - daysElapsedThisWeek)
+    }
+
+    /// 今天已過多少小時（連續）。
+    public var hoursElapsedToday: Double {
+        let start = calendar.startOfDay(for: now)
+        return max(0, now.timeIntervalSince(start) / 3_600)
     }
 
     /// 今天還剩多少小時（連續）。

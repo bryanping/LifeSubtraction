@@ -78,14 +78,6 @@ enum TimeFlowUnit: CaseIterable, Identifiable, Equatable {
         }
     }
 
-    var subtitle: String {
-        switch self {
-        case .year:  return "剩餘人生 · 年"
-        case .month: return "剩餘人生 · 月"
-        case .week:  return "剩餘人生 · 週"
-        case .hour:  return "剩餘人生 · 時"
-        }
-    }
 
     func displayValue(metrics: LifeMetrics) -> String {
         switch self {
@@ -111,12 +103,64 @@ enum TimeFlowUnit: CaseIterable, Identifiable, Equatable {
         guard let index = all.firstIndex(of: self) else { return .year }
         return all[(index + all.count - 1) % all.count]
     }
+
+    /// 與上方剩餘刻度對齊的「當下節奏」進度。
+    struct RhythmContext: Equatable {
+        let title: String
+        let progress: Double
+        let trailingText: String?
+        let detail: String?
+        let remainingText: String?
+        let tint: Color
+    }
+
+    func rhythmContext(metrics: LifeMetrics) -> RhythmContext {
+        switch self {
+        case .year:
+            return RhythmContext(
+                title: "本年已過",
+                progress: metrics.progressOfCurrentYear,
+                trailingText: nil,
+                detail: nil,
+                remainingText: nil,
+                tint: LifeTheme.warm
+            )
+        case .month:
+            return RhythmContext(
+                title: "本月已過",
+                progress: metrics.progressOfCurrentMonth,
+                trailingText: String(format: "已過 %.1f 天", metrics.daysElapsedThisMonth),
+                detail: nil,
+                remainingText: String(format: "還剩 %.1f 天", metrics.daysRemainingThisMonth),
+                tint: LifeTheme.accent
+            )
+        case .week:
+            return RhythmContext(
+                title: "本週已過",
+                progress: metrics.progressOfCurrentWeek,
+                trailingText: String(format: "第 %.1f / 7 天", metrics.daysElapsedThisWeek),
+                detail: nil,
+                remainingText: String(format: "還剩 %.1f 天", metrics.daysRemainingThisWeek),
+                tint: LifeTheme.accent
+            )
+        case .hour:
+            return RhythmContext(
+                title: "今天已過",
+                progress: metrics.progressOfCurrentDay,
+                trailingText: nil,
+                detail: String(format: "已過 %.1f 小時", metrics.hoursElapsedToday),
+                remainingText: String(format: "還剩 %.1f 小時", metrics.hoursRemainingToday),
+                tint: LifeTheme.accentEnd
+            )
+        }
+    }
 }
 
 struct RhythmProgressRow: View {
     let title: String
     let progress: Double
     let tint: Color
+    var trailingText: String? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -125,10 +169,17 @@ struct RhythmProgressRow: View {
                     .font(.subheadline)
                     .foregroundStyle(LifeTheme.textSecondary)
                 Spacer()
-                Text("\(Int((progress * 100).rounded()))%")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(tint)
-                    .monospacedDigit()
+                if let trailingText {
+                    Text(trailingText)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(tint)
+                        .monospacedDigit()
+                } else {
+                    Text("\(Int((progress * 100).rounded()))%")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(tint)
+                        .monospacedDigit()
+                }
             }
             ProgressBar(value: progress, color: tint, useGradient: false)
         }
@@ -143,23 +194,19 @@ struct IntegratedTimeFlowCard: View {
 
     @State private var unit: TimeFlowUnit = .year
     @State private var dragOffset: CGFloat = 0
-    @State private var autoTimer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
+    @State private var autoTimer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
-                Text("時間正在流動")
-                    .font(.subheadline)
-                    .foregroundStyle(LifeTheme.textSecondary)
-                Spacer()
                 unitIndicator
             }
 
             flowValueArea
 
-            Rectangle()
-                .fill(Color.white.opacity(0.08))
-                .frame(height: 0.5)
+//            Rectangle()
+//                .fill(Color.white.opacity(0.08))
+//                .frame(height: 0.5)
 
             rhythmArea
         }
@@ -191,7 +238,7 @@ struct IntegratedTimeFlowCard: View {
             )
 
             VStack(alignment: .leading, spacing: 8) {
-                Text(unit.subtitle)
+                Text("剩餘人生")
                     .font(.caption)
                     .foregroundStyle(LifeTheme.textTertiary)
 
@@ -208,10 +255,6 @@ struct IntegratedTimeFlowCard: View {
                         .font(.title3)
                         .foregroundStyle(LifeTheme.warm)
                 }
-
-                Text("左右滑動切換 · 每 5 秒自動輪播")
-                    .font(.caption2)
-                    .foregroundStyle(LifeTheme.textQuaternary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
@@ -236,38 +279,49 @@ struct IntegratedTimeFlowCard: View {
     }
 
     private var rhythmArea: some View {
-        TimelineView(.periodic(from: Date(), by: 30)) { context in
+        let tickInterval: TimeInterval = unit == .hour ? 1 : 30
+
+        return TimelineView(.periodic(from: Date(), by: tickInterval)) { context in
             let metrics = LifeMetrics(
                 birthday: birthday,
                 lifeExpectancy: lifeExpectancy,
                 now: context.date
             )
+            let rhythm = unit.rhythmContext(metrics: metrics)
 
-            VStack(spacing: 14) {
-                RhythmProgressRow(
-                    title: "本年已過",
-                    progress: metrics.progressOfCurrentYear,
-                    tint: LifeTheme.warm
-                )
-                RhythmProgressRow(
-                    title: "本週已過",
-                    progress: metrics.progressOfCurrentWeek,
-                    tint: LifeTheme.accent
-                )
-                RhythmProgressRow(
-                    title: "今天已過",
-                    progress: metrics.progressOfCurrentDay,
-                    tint: LifeTheme.accentEnd
-                )
+            VStack(alignment: .leading, spacing: 10) {
 
-                HStack(spacing: 8) {
-                    Image(systemName: "sun.horizon.fill")
-                        .font(.caption)
-                        .foregroundStyle(LifeTheme.accent)
-                    Text(String(format: "今天還剩 %.1f 小時", metrics.hoursRemainingToday))
-                        .font(.subheadline)
-                        .foregroundStyle(LifeTheme.textSecondary)
-                        .monospacedDigit()
+                RhythmProgressRow(
+                    title: rhythm.title,
+                    progress: rhythm.progress,
+                    tint: rhythm.tint,
+                    trailingText: rhythm.trailingText
+                )
+                .animation(.easeInOut(duration: 0.35), value: unit)
+
+                if rhythm.detail != nil || rhythm.remainingText != nil {
+                    HStack(spacing: 8) {
+                        if let detail = rhythm.detail {
+                            Image(systemName: "clock.fill")
+                                .font(.caption)
+                                .foregroundStyle(rhythm.tint)
+                            Text(detail)
+                                .font(.subheadline)
+                                .foregroundStyle(LifeTheme.textSecondary)
+                                .monospacedDigit()
+                        }
+                        Spacer()
+                        if let remainingText = rhythm.remainingText {
+                            Text(remainingText)
+                                .font(rhythm.detail != nil ? .caption : .subheadline)
+                                .foregroundStyle(
+                                    rhythm.detail != nil
+                                        ? LifeTheme.textTertiary
+                                        : LifeTheme.textSecondary
+                                )
+                                .monospacedDigit()
+                        }
+                    }
                 }
             }
         }
