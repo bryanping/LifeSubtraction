@@ -29,6 +29,22 @@ public enum LifeTheme {
     public static let warm     = Color(red: 1.00, green: 0.62, blue: 0.36)
     public static let warmSoft = Color(red: 1.00, green: 0.62, blue: 0.36).opacity(0.18)
 
+    // MARK: - 碼錶四圈（參考設計稿：年黃 / 月藍 / 日紅 / 時間綠）
+    public static let ringLife  = Color(red: 1.00, green: 0.84, blue: 0.04)   // 年 · 外圈金黃
+    public static let ringYear  = Color(red: 0.04, green: 0.52, blue: 1.00)   // 月 · 藍
+    public static let ringMonth = Color(red: 1.00, green: 0.28, blue: 0.28)   // 日 · 紅
+    public static let ringDay   = Color(red: 0.30, green: 0.95, blue: 0.45)   // 時間 · 綠
+
+    /// 場記板時間段：亮綠 → 深綠整段漸層
+    public static let ringTimeEnd = Color(red: 0.12, green: 0.62, blue: 0.28)
+    public static var ringTimeGradient: LinearGradient {
+        LinearGradient(
+            colors: [ringDay, ringTimeEnd],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+
     // MARK: - 漸層
 
     /// 主 hero 漸層：teal → blue（取代之前的 teal → purple）  // modified

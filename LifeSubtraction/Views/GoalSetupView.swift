@@ -97,7 +97,7 @@ struct GoalSetupView: View {
                 .padding()
             }
             .background(LifeTheme.subtleBackground.ignoresSafeArea())
-            .navigationTitle("設定人生事件")
+            .navigationTitle("設定規劃")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

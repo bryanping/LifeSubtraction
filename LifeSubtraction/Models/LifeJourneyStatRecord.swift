@@ -54,4 +54,14 @@ enum JourneyStatCalculator {
         else { return 0 }
         return count(in: DateInterval(start: start, end: thisMonthStart), itemId: itemId, records: allRecords)
     }
+
+    // 修改内容 — 年度累積（修正「年度回顧」原本錯誤顯示本月數據的問題）
+    static func thisYearCount(itemId: UUID, records allRecords: [LifeJourneyStatRecord], now: Date = Date()) -> Int {
+        let calendar = Calendar.current
+        guard
+            let start = calendar.date(from: calendar.dateComponents([.year], from: now)),
+            let end = calendar.date(byAdding: .year, value: 1, to: start)
+        else { return 0 }
+        return count(in: DateInterval(start: start, end: end), itemId: itemId, records: allRecords)
+    }
 }

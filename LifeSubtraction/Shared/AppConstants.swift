@@ -9,6 +9,14 @@ enum AppConstants {
     /// 都要勾選同一個。請依你的 Bundle ID 更新此值。
     static let appGroup = "group.com.yourname.lifesubtraction"
 
+    /// 主 Tab 索引（與 ContentView TabView tag 一致）
+    enum MainTab: Int, Hashable {
+        case overview = 0
+        case countdown = 1
+        case goals = 2
+        case settings = 3
+    }
+
     /// 共享 UserDefaults 的 keys
     enum Key {
         static let birthday = "birthday"

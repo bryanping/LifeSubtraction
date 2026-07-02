@@ -57,6 +57,8 @@ enum StorageKey {
     static let lifeJourneyStatRecords  = "life-journey-stat-records"
     static let familyMembers           = AppConstants.Key.familyMembers
     static let familyMomentRecords     = AppConstants.Key.familyMomentRecords
+    static let lifeTasks               = "life-tasks" // 修改内容 — 輕量人生待辦清單
+    static let goalAccumulationLogs    = "goal-accumulation-logs" // 修改内容 — 目標真實投入時數記錄
     static let legacyLifeGoals         = "life-goals"
     static let legacyParentAge         = "parentAge"
     static let legacyParentLifeExpectancy = "parentLifeExpectancy"

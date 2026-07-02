@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var store: LifeStore
     @StateObject private var storeManager = StoreManager.shared
+    @State private var selectedTab = AppConstants.MainTab.overview.rawValue
 
     init() {
         let appearance = UITabBarAppearance()
@@ -27,17 +28,19 @@ struct ContentView: View {
                 OnboardingView()
                     .environmentObject(storeManager)
             } else {
-                TabView {
-                    OverviewView()
+                TabView(selection: $selectedTab) {
+                    OverviewView(selectedTab: $selectedTab)
                         .tabItem { Label("總覽", systemImage: "chart.pie.fill") }
+                        .tag(AppConstants.MainTab.overview.rawValue)
                     CountdownView()
-                //        .premiumGate()
-                        .tabItem { Label("倒數", systemImage: "hourglass") }
+                        .tabItem { Label("時間", systemImage: "hourglass") }
+                        .tag(AppConstants.MainTab.countdown.rawValue)
                     LifeGoalsView()
-                //        .premiumGate()
-                        .tabItem { Label("人生目標", systemImage: "target") }
+                        .tabItem { Label("規劃", systemImage: "star.fill") }
+                        .tag(AppConstants.MainTab.goals.rawValue)
                     SettingsView()
                         .tabItem { Label("設定", systemImage: "gearshape.fill") }
+                        .tag(AppConstants.MainTab.settings.rawValue)
                 }
                 .tint(LifeTheme.accent)
                 .environmentObject(storeManager)

@@ -374,7 +374,8 @@
 				DEVELOPMENT_TEAM = K6N38A5JS6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "同步人生目標到提醒事項，不錯過想完成的事。";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "同步規劃到 Apple 日曆，安排當天、當月與年度時間。";
+				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "同步規劃到提醒事項，不錯過想完成的事。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -411,7 +412,8 @@
 				DEVELOPMENT_TEAM = K6N38A5JS6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "同步人生目標到提醒事項，不錯過想完成的事。";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "同步規劃到 Apple 日曆，安排當天、當月與年度時間。";
+				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "同步規劃到提醒事項，不錯過想完成的事。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

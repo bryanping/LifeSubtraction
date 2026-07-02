@@ -3,9 +3,12 @@ import SwiftUI
 struct LifeGoalsView: View {
     @State private var activeGoals: [LifeGoal] = []
     @State private var moments: [LifeMoment] = []
+    @State private var tasks: [LifeTask] = []
     @State private var showingCatalog = false
     @State private var showingAddCustom = false
     @State private var navigationPath = NavigationPath()
+    // 修改内容 — 規劃頁新增年/月/日切換，依有空時間安排事件
+    @State private var planningScope: PlanningScope = .day
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -13,9 +16,9 @@ struct LifeGoalsView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     heroIntro
 
-                    if !activeGoals.isEmpty {
-                        activeGoalsSection
-                    }
+                    scopePicker
+
+                    planningScopeContent
 
                     momentsSection
 
@@ -27,8 +30,8 @@ struct LifeGoalsView: View {
                 .padding(.vertical, 16)
             }
             .background(LifeTheme.subtleBackground.ignoresSafeArea())
-            .navigationTitle("人生目標")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("規劃")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -80,40 +83,55 @@ struct LifeGoalsView: View {
         }
     }
 
-    var heroIntro: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("如果人生有限，")
-                .font(.title3.weight(.medium))
-                .foregroundStyle(LifeTheme.textPrimary)
-            Text("你最想完成什麼？")
-                .font(.title3.weight(.medium))
-                .foregroundStyle(LifeTheme.accent)
-            Text("一次一件事，完成後成為你的人生回憶。")
-                .font(.subheadline)
-                .foregroundStyle(LifeTheme.textSecondary)
-                .padding(.top, 4)
+    // 修改内容 — 年/月/日分段切換
+    var scopePicker: some View {
+        Picker("", selection: $planningScope) {
+            ForEach(PlanningScope.allCases) { scope in
+                Text(scope.title).tag(scope)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
+    // 修改内容 — 依切換單位顯示對應的規劃內容
+    @ViewBuilder
+    var planningScopeContent: some View {
+        switch planningScope {
+        case .day:
+            PlanningDayView(
+                goals: activeGoals,
+                tasks: tasks,
+                onSelectGoal: { navigationPath.append($0) },
+                onAcceptSuggestion: { acceptSuggestion($0) }
+            )
+        case .month:
+            PlanningMonthView(
+                goals: activeGoals,
+                tasks: tasks,
+                onSelectGoal: { navigationPath.append($0) }
+            )
+        case .year:
+            PlanningYearView(
+                goals: activeGoals,
+                tasks: tasks,
+                onSelectGoal: { navigationPath.append($0) }
+            )
         }
     }
 
-    var activeGoalsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("進行中")
-                .font(.headline)
-                .foregroundStyle(LifeTheme.textPrimary)
+    var heroIntro: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("如果人生有限，你想怎麼安排？")
+                .font(.title3.weight(.medium))
+                .foregroundStyle(LifeTheme.accent)
 
-            ForEach(activeGoals.filter { $0.status == .active }) { goal in
-                NavigationLink(value: goal.id) {
-                    goalCard(goal)
-                }
-                .buttonStyle(.plain)
-            }
         }
     }
 
     var momentsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             if !moments.isEmpty {
-                Text("人生時刻")
+                Text("完成紀錄")
                     .font(.headline)
                     .foregroundStyle(LifeTheme.textPrimary)
 
@@ -138,45 +156,6 @@ struct LifeGoalsView: View {
         }
         .frame(maxWidth: .infinity)
         .cardStyle(padding: 24)
-    }
-
-    func goalCard(_ goal: LifeGoal) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: goal.category.iconName)
-                    .foregroundStyle(LifeTheme.accent)
-                Text(goal.category.displayName)
-                    .font(.caption)
-                    .foregroundStyle(LifeTheme.textTertiary)
-                Spacer()
-                Text("\(goal.completedStageCount)/\(goal.stages.count)")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(LifeTheme.warm)
-            }
-
-            Text(goal.displayTitle)
-                .font(.headline)
-                .foregroundStyle(LifeTheme.textPrimary)
-                .lineLimit(2)
-
-            if let days = goal.daysUntilDue {
-                HStack(spacing: 4) {
-                    Image(systemName: goal.isOverdue ? "exclamationmark.triangle.fill" : "calendar")
-                        .font(.caption2)
-                    Text(days < 0 ? "已逾期 \(abs(days)) 天" : (days == 0 ? "今天到期" : "還剩 \(days) 天"))
-                        .font(.caption2)
-                }
-                .foregroundStyle(goal.isOverdue ? Color.red.opacity(0.85) : LifeTheme.textTertiary)
-            }
-
-            ProgressBar(
-                value: goal.stages.isEmpty ? 0 : Double(goal.completedStageCount) / Double(goal.stages.count),
-                color: LifeTheme.accent,
-                useGradient: false
-            )
-            .frame(height: 6)
-        }
-        .cardStyle(padding: 16)
     }
 
     func momentCard(_ moment: LifeMoment) -> some View {
@@ -236,6 +215,11 @@ struct LifeGoalsView: View {
             key: StorageKey.lifeMoments,
             defaultValue: []
         )
+        tasks = LocalJSONStore.load(
+            [LifeTask].self,
+            key: StorageKey.lifeTasks,
+            defaultValue: []
+        )
     }
 
     func saveGoals() {
@@ -244,6 +228,24 @@ struct LifeGoalsView: View {
 
     func saveMoments() {
         LocalJSONStore.save(moments, key: StorageKey.lifeMoments)
+    }
+
+    func saveTasks() {
+        LocalJSONStore.save(tasks, key: StorageKey.lifeTasks)
+    }
+
+    // 修改内容 — 接受空檔建議：任務排入該時段提醒，目標則進入詳情頁安排下一步
+    func acceptSuggestion(_ suggestion: PlanningSuggestion) {
+        if let taskId = suggestion.taskId,
+           let idx = tasks.firstIndex(where: { $0.id == taskId }) {
+            let hour = suggestion.slot.startHour
+            tasks[idx].reminderDate = Calendar.current.date(
+                bySettingHour: hour, minute: 0, second: 0, of: Date()
+            )
+            saveTasks()
+        } else if let goalId = suggestion.goalId {
+            navigationPath.append(goalId)
+        }
     }
 }
 

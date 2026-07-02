@@ -77,3 +77,86 @@ final class RemindersManager {
         return cal.date(from: DateComponents(year: year, month: 12, day: 28, hour: 9, minute: 0)) ?? Date()
     }
 }
+
+@MainActor
+final class AppleCalendarManager {
+    static let shared = AppleCalendarManager()
+
+    private let store = EKEventStore()
+
+    private init() {}
+
+    func requestAccess() async -> Bool {
+        do {
+            return try await store.requestFullAccessToEvents()
+        } catch {
+            return false
+        }
+    }
+
+    func syncGoal(_ goal: LifeGoal) async -> String? {
+        guard await requestAccess() else { return nil }
+        let calendar = store.defaultCalendarForNewEvents
+        let event: EKEvent
+
+        if let existingId = goal.timePlan.calendarEventIdentifier,
+           let existing = store.event(withIdentifier: existingId) {
+            event = existing
+        } else {
+            event = EKEvent(eventStore: store)
+            event.calendar = calendar
+        }
+
+        event.title = goal.displayTitle
+        event.notes = calendarNotes(for: goal)
+        event.startDate = combinedDate(day: goal.timePlan.dailyDate, time: goal.timePlan.dailyStart)
+        event.endDate = max(
+            combinedDate(day: goal.timePlan.dailyDate, time: goal.timePlan.dailyEnd),
+            event.startDate.addingTimeInterval(15 * 60)
+        )
+
+        do {
+            try store.save(event, span: .thisEvent, commit: true)
+            return event.eventIdentifier
+        } catch {
+            return nil
+        }
+    }
+
+    func removeEvent(identifier: String?) {
+        guard let identifier,
+              let event = store.event(withIdentifier: identifier)
+        else { return }
+        try? store.remove(event, span: .thisEvent, commit: true)
+    }
+
+    private func combinedDate(day: Date, time: Date) -> Date {
+        let cal = Calendar.current
+        let dayComponents = cal.dateComponents([.year, .month, .day], from: day)
+        let timeComponents = cal.dateComponents([.hour, .minute], from: time)
+        return cal.date(from: DateComponents(
+            year: dayComponents.year,
+            month: dayComponents.month,
+            day: dayComponents.day,
+            hour: timeComponents.hour,
+            minute: timeComponents.minute
+        )) ?? day
+    }
+
+    private func calendarNotes(for goal: LifeGoal) -> String {
+        var lines = ["來自人生減法 · 規劃"]
+        if let estimatedHours = goal.estimatedHours {
+            lines.append("預估總長：\(estimatedHours) 小時")
+        }
+        if let weeklyHours = goal.weeklyHours {
+            lines.append(String(format: "每週投入：%.1f 小時", weeklyHours))
+        }
+        lines.append(String(format: "本月規劃：%.1f 小時", goal.timePlan.monthlyHours))
+        lines.append(String(format: "年度規劃：%.1f 小時", goal.timePlan.yearlyHours))
+        if !goal.notes.isEmpty {
+            lines.append("")
+            lines.append(goal.notes)
+        }
+        return lines.joined(separator: "\n")
+    }
+}

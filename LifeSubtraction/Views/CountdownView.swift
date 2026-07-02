@@ -3,199 +3,93 @@ import SwiftUI
 struct CountdownView: View {
     @EnvironmentObject var store: LifeStore
 
-    @State private var remainingMomentItems: [RemainingMomentItem] = []
-    @State private var deletingItem: RemainingMomentItem?
-    @State private var showingAddMoment = false
+    @State private var heroUnit: TimeFlowHeroUnit = .yearDays
 
-    private let momentColumns = [GridItem(.flexible()), GridItem(.flexible())]
+    @State private var activeGoals: [LifeGoal] = []
+    @State private var tasks: [LifeTask] = []
+    @State private var familyMembers: [FamilyMember] = []
+    @State private var moments: [LifeMoment] = []
+    @State private var navigationPath = NavigationPath()
+    // 修改内容 — 推薦批次，讓刷新按鈕可以切換不同推薦
+    @State private var recommendBatch: Int = 0
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ScrollView {
-                VStack(spacing: 20) {
-                    IntegratedTimeFlowCard(
+                VStack(spacing: 0) {
+
+                    // ── 修改内容：頂部區塊（LCD + 時間感），控制在 1/3 畫面以内 ──
+                    LCDTimeFlowSection(
                         birthday: store.birthday,
-                        lifeExpectancy: store.lifeExpectancy
+                        lifeExpectancy: store.lifeExpectancy,
+                        heroUnit: $heroUnit
                     )
-                    .padding(.horizontal)
 
-                    remainingMomentsSection
-                        .padding(.horizontal)
+                    // 分隔線
+                    Rectangle()
+                        .fill(Color.white.opacity(0.07))
+                        .frame(height: 0.5)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 20)
 
-                    Spacer(minLength: 20)
+                    // ── 修改内容：時間情境推薦，僅顯示今天可做的小行動 ──
+                    TimeRecommendationSection(
+                        heroUnit: heroUnit,
+                        birthday: store.birthday,
+                        lifeExpectancy: store.lifeExpectancy,
+                        goals: activeGoals,
+                        tasks: tasks,
+                        familyMembers: familyMembers,
+                        batch: recommendBatch,
+                        onAction: handleRecommendationAction,
+                        onRefresh: { recommendBatch += 1 }
+                    )
+                    .padding(.horizontal, 20)
+
+                    Spacer(minLength: 32)
                 }
-                .padding(.vertical, 16)
+                .padding(.vertical, 8)
             }
             .background(LifeTheme.subtleBackground.ignoresSafeArea())
-            .navigationTitle("倒數")
+            .navigationTitle("時間")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(for: RemainingMomentItem.self) { item in
-                RemainingMomentDetailView(
-                    item: item,
-                    journeyStats: journeyStatsBinding,
-                    journeyRecords: journeyRecordsBinding
+            .onAppear(perform: loadGoals)
+            // 切換 unit 時重置批次
+            .onChange(of: heroUnit) { _, _ in recommendBatch = 0 }
+            .navigationDestination(for: GoalRoute.self) { route in
+                LifeGoalDetailView(
+                    goals: $activeGoals,
+                    moments: $moments,
+                    goalId: route.goalId,
+                    startInEditMode: route.startInEditMode
                 )
-                .environmentObject(store)
-            }
-            .onAppear { loadAllData() }
-            .sheet(isPresented: $showingAddMoment) {
-                AddRemainingMomentView { newItem in
-                    remainingMomentItems.append(newItem)
-                    saveRemainingMomentItems()
-                }
-            }
-            .alert(
-                "刪除項目？",
-                isPresented: Binding(
-                    get: { deletingItem != nil },
-                    set: { if !$0 { deletingItem = nil } }
-                ),
-                presenting: deletingItem
-            ) { item in
-                Button("刪除", role: .destructive) {
-                    archiveRemainingMoment(item)
-                    deletingItem = nil
-                }
-                Button("取消", role: .cancel) { deletingItem = nil }
-            } message: { item in
-                Text("「\(item.title)」將被移至封存。")
             }
         }
     }
 
-    // MARK: - Remaining Moments（一排兩個）
+    private func loadGoals() {
+        activeGoals = LocalJSONStore.load([LifeGoal].self, key: StorageKey.lifeGoals, defaultValue: [])
+        tasks = LocalJSONStore.load([LifeTask].self, key: StorageKey.lifeTasks, defaultValue: [])
+        familyMembers = LocalJSONStore.load([FamilyMember].self, key: StorageKey.familyMembers, defaultValue: [])
+        moments = LocalJSONStore.load([LifeMoment].self, key: StorageKey.lifeMoments, defaultValue: [])
+    }
 
-    var remainingMomentsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("你還有幾次？")
-                    .font(.headline)
-                    .foregroundStyle(LifeTheme.textPrimary)
-                Spacer()
-                Button(action: { showingAddMoment = true }) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(LifeTheme.accent)
-                }
+    private func handleRecommendationAction(_ action: TimeRecommendationAction) {
+        switch action {
+        case let .addTask(title, category, minutes):
+            let duplicate = tasks.contains {
+                $0.isPending && $0.title.trimmingCharacters(in: .whitespacesAndNewlines) == title
             }
+            guard !duplicate else { return }
+            let task = LifeTask(title: title, category: category, estimatedMinutes: minutes, isStarred: true)
+            tasks.insert(task, at: 0)
+            LocalJSONStore.save(tasks, key: StorageKey.lifeTasks)
 
-            if activeRemainingMomentItems.isEmpty {
-                VStack(spacing: 8) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 28))
-                        .foregroundStyle(LifeTheme.textTertiary)
-                    Text("在總覽完成問卷，或手動新增項目")
-                        .font(.subheadline)
-                        .foregroundStyle(LifeTheme.textSecondary)
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .cardStyle(padding: 20)
-            } else {
-                LazyVGrid(columns: momentColumns, spacing: 12) {
-                    ForEach(activeRemainingMomentItems) { item in
-                        NavigationLink(value: item) {
-                            momentGridCell(for: item)
-                        }
-                        .buttonStyle(.plain)
-                        .contextMenu {
-                            Button(role: .destructive) { deletingItem = item } label: {
-                                Label("刪除", systemImage: "trash")
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+        case let .openGoal(goalId):
+            navigationPath.append(GoalRoute(goalId: goalId, startInEditMode: true))
 
-    var activeRemainingMomentItems: [RemainingMomentItem] {
-        remainingMomentItems.filter { !$0.isArchived }
-    }
-
-    func momentGridCell(for item: RemainingMomentItem) -> some View {
-        let remaining = item.estimatedRemainingOccurrences(store: store, metrics: store.metrics)
-
-        return VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: item.iconName)
-                .font(.caption)
-                .foregroundStyle(LifeTheme.accent)
-
-            Text(item.title)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(LifeTheme.textPrimary)
-                .lineLimit(2)
-                .minimumScaleFactor(0.85)
-
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text("\(remaining.formatted())")
-                    .font(.system(.title3, design: .rounded).weight(.semibold))
-                    .foregroundStyle(LifeTheme.warm)
-                Text(item.unit)
-                    .font(.caption)
-                    .foregroundStyle(LifeTheme.textTertiary)
-            }
-
-            Text(item.frequency.displayName)
-                .font(.caption2)
-                .foregroundStyle(LifeTheme.textQuaternary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(LifeTheme.glassFill)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(LifeTheme.glassBorder, lineWidth: 0.5)
-        )
-    }
-
-    private var journeyStatsBinding: Binding<[LifeJourneyStatItem]> {
-        Binding(
-            get: {
-                LocalJSONStore.load(
-                    [LifeJourneyStatItem].self,
-                    key: StorageKey.lifeJourneyStatItems,
-                    defaultValue: []
-                )
-            },
-            set: { LocalJSONStore.save($0, key: StorageKey.lifeJourneyStatItems) }
-        )
-    }
-
-    private var journeyRecordsBinding: Binding<[LifeJourneyStatRecord]> {
-        Binding(
-            get: {
-                LocalJSONStore.load(
-                    [LifeJourneyStatRecord].self,
-                    key: StorageKey.lifeJourneyStatRecords,
-                    defaultValue: []
-                )
-            },
-            set: { LocalJSONStore.save($0, key: StorageKey.lifeJourneyStatRecords) }
-        )
-    }
-
-    func archiveRemainingMoment(_ item: RemainingMomentItem) {
-        guard let index = remainingMomentItems.firstIndex(where: { $0.id == item.id }) else { return }
-        remainingMomentItems[index].isArchived = true
-        saveRemainingMomentItems()
-    }
-
-    func saveRemainingMomentItems() {
-        LocalJSONStore.save(remainingMomentItems, key: StorageKey.remainingMomentItems)
-    }
-
-    func loadAllData() {
-        remainingMomentItems = LocalJSONStore.load(
-            [RemainingMomentItem].self,
-            key: StorageKey.remainingMomentItems,
-            defaultValue: []
-        )
-        if RemainingMomentItem.migrateLegacyParentDependency(&remainingMomentItems) {
-            saveRemainingMomentItems()
+        case .none:
+            break
         }
     }
 }

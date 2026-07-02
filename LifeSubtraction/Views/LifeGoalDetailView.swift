@@ -16,6 +16,7 @@ struct LifeGoalDetailView: View {
     @State private var showCompletionSheet = false
     @State private var showDeleteConfirm = false
     @State private var remindersEnabled = false
+    @State private var calendarSyncEnabled = false
     @State private var isEditingStages = false
 
     private var goalIndex: Int? {
@@ -32,7 +33,7 @@ struct LifeGoalDetailView: View {
             }
         }
         .background(LifeTheme.subtleBackground.ignoresSafeArea())
-        .navigationTitle(goals.first(where: { $0.id == goalId })?.displayTitle ?? "人生目標")
+        .navigationTitle(goals.first(where: { $0.id == goalId })?.displayTitle ?? "規劃")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if goals.first(where: { $0.id == goalId })?.status == .active {
@@ -96,6 +97,8 @@ struct LifeGoalDetailView: View {
                 stagesSection(index: index, goal: goal)
 
                 if goal.status == .active {
+                    timePlanningSection(index: index, goal: goal)
+
                     GoalDueDateSection(
                         dueDate: $goals[index].dueDate,
                         originalDueDate: $goals[index].originalDueDate,
@@ -210,6 +213,175 @@ struct LifeGoalDetailView: View {
         .cardStyle()
     }
 
+    func timePlanningSection(index: Int, goal: LifeGoal) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Text("時間規劃")
+                    .font(.headline)
+                    .foregroundStyle(LifeTheme.textPrimary)
+                Spacer()
+                Text("\(goals[index].timePlan.dailyMinutes) 分鐘")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(LifeTheme.accent)
+            }
+
+            HStack(spacing: 12) {
+                numericField(
+                    title: "任務總長",
+                    value: Binding(
+                        get: { goals[index].estimatedHours.map(String.init) ?? "" },
+                        set: { value in
+                            goals[index].estimatedHours = Int(value.filter(\.isNumber))
+                            saveGoalsAndSyncCalendar(index: index)
+                        }
+                    ),
+                    suffix: "小時"
+                )
+
+                numericField(
+                    title: "每週投入",
+                    value: Binding(
+                        get: {
+                            guard let weeklyHours = goals[index].weeklyHours else { return "" }
+                            return String(format: "%.1f", weeklyHours)
+                        },
+                        set: { value in
+                            goals[index].weeklyHours = Double(value)
+                            saveGoalsAndSyncCalendar(index: index)
+                        }
+                    ),
+                    suffix: "小時"
+                )
+            }
+
+            DatePicker(
+                "當天日期",
+                selection: Binding(
+                    get: { goals[index].timePlan.dailyDate },
+                    set: {
+                        goals[index].timePlan.dailyDate = $0
+                        saveGoalsAndSyncCalendar(index: index)
+                    }
+                ),
+                displayedComponents: .date
+            )
+            .tint(LifeTheme.accent)
+
+            DatePicker(
+                "開始時間",
+                selection: Binding(
+                    get: { goals[index].timePlan.dailyStart },
+                    set: {
+                        goals[index].timePlan.dailyStart = $0
+                        if goals[index].timePlan.dailyEnd <= $0 {
+                            goals[index].timePlan.dailyEnd = $0.addingTimeInterval(3600)
+                        }
+                        saveGoalsAndSyncCalendar(index: index)
+                    }
+                ),
+                displayedComponents: .hourAndMinute
+            )
+            .tint(LifeTheme.accent)
+
+            DatePicker(
+                "結束時間",
+                selection: Binding(
+                    get: { goals[index].timePlan.dailyEnd },
+                    set: {
+                        goals[index].timePlan.dailyEnd = $0
+                        saveGoalsAndSyncCalendar(index: index)
+                    }
+                ),
+                displayedComponents: .hourAndMinute
+            )
+            .tint(LifeTheme.accent)
+
+            HStack(spacing: 12) {
+                decimalStepper(
+                    title: "本月規劃",
+                    value: Binding(
+                        get: { goals[index].timePlan.monthlyHours },
+                        set: {
+                            goals[index].timePlan.monthlyHours = $0
+                            saveGoalsAndSyncCalendar(index: index)
+                        }
+                    )
+                )
+
+                decimalStepper(
+                    title: "年度規劃",
+                    value: Binding(
+                        get: { goals[index].timePlan.yearlyHours },
+                        set: {
+                            goals[index].timePlan.yearlyHours = $0
+                            saveGoalsAndSyncCalendar(index: index)
+                        }
+                    )
+                )
+            }
+
+            Toggle(isOn: $calendarSyncEnabled) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("同步到 Apple 日曆")
+                        .font(.subheadline)
+                        .foregroundStyle(LifeTheme.textPrimary)
+                    Text("依當天日期與開始 / 結束時間建立行程")
+                        .font(.caption)
+                        .foregroundStyle(LifeTheme.textTertiary)
+                }
+            }
+            .tint(LifeTheme.accent)
+            .onAppear {
+                calendarSyncEnabled = goal.timePlan.calendarEventIdentifier != nil
+            }
+            .onChange(of: calendarSyncEnabled) { _, enabled in
+                Task {
+                    if enabled {
+                        let id = await AppleCalendarManager.shared.syncGoal(goals[index])
+                        goals[index].timePlan.calendarEventIdentifier = id
+                    } else {
+                        AppleCalendarManager.shared.removeEvent(identifier: goals[index].timePlan.calendarEventIdentifier)
+                        goals[index].timePlan.calendarEventIdentifier = nil
+                    }
+                    saveGoals()
+                }
+            }
+        }
+        .cardStyle()
+    }
+
+    func numericField(title: String, value: Binding<String>, suffix: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(LifeTheme.textTertiary)
+            HStack(spacing: 6) {
+                TextField("0", text: value)
+                    .keyboardType(.decimalPad)
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(LifeTheme.textPrimary)
+                Text(suffix)
+                    .font(.caption)
+                    .foregroundStyle(LifeTheme.textTertiary)
+            }
+            .padding(10)
+            .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.04)))
+        }
+    }
+
+    func decimalStepper(title: String, value: Binding<Double>) -> some View {
+        Stepper(value: value, in: 0...2000, step: 1) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(LifeTheme.textTertiary)
+                Text(String(format: "%.0f 小時", value.wrappedValue))
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(LifeTheme.textPrimary)
+            }
+        }
+    }
+
     func remindersToggle(index: Int, goal: LifeGoal) -> some View {
         Toggle(isOn: $remindersEnabled) {
             VStack(alignment: .leading, spacing: 4) {
@@ -286,6 +458,7 @@ struct LifeGoalDetailView: View {
     func deleteGoal() {
         guard let index = goalIndex else { return }
         RemindersManager.shared.removeReminder(identifier: goals[index].reminderIdentifier)
+        AppleCalendarManager.shared.removeEvent(identifier: goals[index].timePlan.calendarEventIdentifier)
         goals.remove(at: index)
         saveGoals()
         dismiss()
@@ -305,6 +478,16 @@ struct LifeGoalDetailView: View {
 
     func saveGoals() {
         LocalJSONStore.save(goals, key: StorageKey.lifeGoals)
+    }
+
+    func saveGoalsAndSyncCalendar(index: Int) {
+        saveGoals()
+        guard calendarSyncEnabled, goals.indices.contains(index) else { return }
+        Task {
+            let id = await AppleCalendarManager.shared.syncGoal(goals[index])
+            goals[index].timePlan.calendarEventIdentifier = id
+            saveGoals()
+        }
     }
 
     func saveMoments() {

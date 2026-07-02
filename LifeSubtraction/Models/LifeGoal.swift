@@ -82,6 +82,43 @@ struct GoalStage: Identifiable, Codable, Hashable {
     }
 }
 
+struct GoalTimePlan: Codable, Hashable {
+    var dailyDate: Date
+    var dailyStart: Date
+    var dailyEnd: Date
+    var monthlyHours: Double
+    var yearlyHours: Double
+    var calendarEventIdentifier: String?
+
+    init(
+        dailyDate: Date = Date(),
+        dailyStart: Date = GoalTimePlan.defaultStart(),
+        dailyEnd: Date = GoalTimePlan.defaultEnd(),
+        monthlyHours: Double = 8,
+        yearlyHours: Double = 96,
+        calendarEventIdentifier: String? = nil
+    ) {
+        self.dailyDate = dailyDate
+        self.dailyStart = dailyStart
+        self.dailyEnd = dailyEnd
+        self.monthlyHours = monthlyHours
+        self.yearlyHours = yearlyHours
+        self.calendarEventIdentifier = calendarEventIdentifier
+    }
+
+    var dailyMinutes: Int {
+        max(15, Int(dailyEnd.timeIntervalSince(dailyStart) / 60))
+    }
+
+    static func defaultStart() -> Date {
+        Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: Date()) ?? Date()
+    }
+
+    static func defaultEnd() -> Date {
+        Calendar.current.date(bySettingHour: 21, minute: 0, second: 0, of: Date()) ?? Date().addingTimeInterval(3600)
+    }
+}
+
 // MARK: - Life Goal
 
 struct LifeGoal: Identifiable, Codable, Hashable {
@@ -100,6 +137,10 @@ struct LifeGoal: Identifiable, Codable, Hashable {
     var originalDueDate: Date?
     var extensionCount: Int
     var createdAt: Date
+    // 修改内容 — 時間規劃欄位：目標所需總時數 & 每週願意投入時數
+    var estimatedHours: Int?
+    var weeklyHours: Double?
+    var timePlan: GoalTimePlan
 
     init(
         id: UUID = UUID(),
@@ -116,7 +157,10 @@ struct LifeGoal: Identifiable, Codable, Hashable {
         dueDate: Date? = nil,
         originalDueDate: Date? = nil,
         extensionCount: Int = 0,
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        estimatedHours: Int? = nil,
+        weeklyHours: Double? = nil,
+        timePlan: GoalTimePlan = GoalTimePlan()
     ) {
         self.id = id
         self.title = title
@@ -133,6 +177,9 @@ struct LifeGoal: Identifiable, Codable, Hashable {
         self.originalDueDate = originalDueDate ?? dueDate
         self.extensionCount = extensionCount
         self.createdAt = createdAt
+        self.estimatedHours = estimatedHours
+        self.weeklyHours = weeklyHours
+        self.timePlan = timePlan
     }
 
     var isDueDateLocked: Bool {
@@ -169,6 +216,7 @@ struct LifeGoal: Identifiable, Codable, Hashable {
     enum CodingKeys: String, CodingKey {
         case id, title, category, startDate, completedDate, notes, status, stages
         case reminderIdentifier, catalogId, detailSelections, dueDate, originalDueDate, extensionCount, createdAt
+        case estimatedHours, weeklyHours, timePlan // 修改内容
     }
 
     init(from decoder: Decoder) throws {
@@ -189,6 +237,9 @@ struct LifeGoal: Identifiable, Codable, Hashable {
         originalDueDate = try container.decodeIfPresent(Date.self, forKey: .originalDueDate) ?? dueDate
         extensionCount = try container.decodeIfPresent(Int.self, forKey: .extensionCount) ?? 0
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
+        estimatedHours = try container.decodeIfPresent(Int.self, forKey: .estimatedHours)
+        weeklyHours = try container.decodeIfPresent(Double.self, forKey: .weeklyHours)
+        timePlan = try container.decodeIfPresent(GoalTimePlan.self, forKey: .timePlan) ?? GoalTimePlan()
     }
 
     func encode(to encoder: Encoder) throws {
@@ -208,6 +259,9 @@ struct LifeGoal: Identifiable, Codable, Hashable {
         try container.encodeIfPresent(originalDueDate, forKey: .originalDueDate)
         try container.encode(extensionCount, forKey: .extensionCount)
         try container.encode(createdAt, forKey: .createdAt)
+        try container.encodeIfPresent(estimatedHours, forKey: .estimatedHours)
+        try container.encodeIfPresent(weeklyHours, forKey: .weeklyHours)
+        try container.encode(timePlan, forKey: .timePlan)
     }
 
     var completedStageCount: Int { stages.filter(\.isDone).count }

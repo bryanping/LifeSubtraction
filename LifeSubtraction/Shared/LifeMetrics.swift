@@ -141,6 +141,13 @@ public struct LifeMetrics: Equatable, Sendable {
         max(0, Double(daysInCurrentMonth) - daysElapsedThisMonth)
     }
 
+    /// 今年還剩天數（連續，含小數）。
+    public var daysRemainingThisYear: Double {
+        let year = calendar.component(.year, from: now)
+        guard let end = calendar.date(from: DateComponents(year: year + 1, month: 1, day: 1)) else { return 0 }
+        return max(0, end.timeIntervalSince(now) / 86_400)
+    }
+
     /// 本週已過天數（連續，0…7）。
     public var daysElapsedThisWeek: Double {
         guard let interval = calendar.dateInterval(of: .weekOfYear, for: now) else { return 0 }
@@ -175,6 +182,105 @@ public struct LifeMetrics: Equatable, Sendable {
     /// 大約還有幾個夏天（北半球 6–8 月，每年最多計一次）。
     public var summersLeft: Int {
         countRemainingSummers()
+    }
+
+    // MARK: - 碼錶圓環（yy.mm.dd = 人生；外圈 / hh:mm:ss.s = 當日）
+
+    private var lifeDaysPrecise: Double {
+        var remaining = secondsRemaining
+        let yearSec = 365.25 * 86_400
+        let monthSec = yearSec / 12
+        let daySec = 86_400.0
+
+        let yy = min(99, Int(remaining / yearSec))
+        remaining -= Double(yy) * yearSec
+        let mm = min(99, Int(remaining / monthSec))
+        remaining -= Double(mm) * monthSec
+        return max(0, remaining / daySec)
+    }
+
+    /// 外圈：當日剩餘時間（24 進制，依 Calendar.current 裝置時區）。
+    public var todayHoursRingFraction: Double {
+        max(0, min(1, hoursRemainingToday / 24))
+    }
+
+    /// 第二圈：人生剩餘「日」（31 進制，綠）。
+    public var lifeDaysRingFraction: Double {
+        max(0, min(1, lifeDaysPrecise / 31))
+    }
+
+    /// 第三圈：人生剩餘「月」（12 進制，藍）。
+    public var lifeMonthsRingFraction: Double {
+        let c = lifeDateComponents
+        let monthPrecise = Double(c.months) + lifeDaysPrecise / 31
+        return max(0, min(1, monthPrecise / 12))
+    }
+
+    /// 內圈：人生剩餘「年」（預期壽命刻度，粉）。
+    public var lifeYearsRingFraction: Double {
+        let c = lifeDateComponents
+        let monthPrecise = Double(c.months) + lifeDaysPrecise / 31
+        let yearPrecise = Double(c.years) + monthPrecise / 12
+        return max(0, min(1, yearPrecise / Double(max(1, lifeExpectancy))))
+    }
+
+    /// 中心百分比：人生總剩餘比例。
+    public var lifeRemainingFraction: Double {
+        max(0, min(1, percentRemaining))
+    }
+
+    /// 人生剩餘：年、月、日（對應 yy.mm.dd）。
+    public var lifeDateComponents: (years: Int, months: Int, days: Int) {
+        var remaining = secondsRemaining
+
+        let yearSec = 365.25 * 86_400
+        let monthSec = yearSec / 12
+        let daySec = 86_400.0
+
+        let yy = min(99, Int(remaining / yearSec))
+        remaining -= Double(yy) * yearSec
+
+        let mm = min(99, Int(remaining / monthSec))
+        remaining -= Double(mm) * monthSec
+
+        let dd = min(31, Int(remaining / daySec))
+        return (yy, mm, dd)
+    }
+
+    /// 當日剩餘：時、分、秒、十分之一秒（對應 hh:mm:ss.s，裝置時區）。
+    public var todayTimeComponents: (hours: Int, minutes: Int, seconds: Int, tenth: Int) {
+        let start = calendar.startOfDay(for: now)
+        guard let end = calendar.date(byAdding: .day, value: 1, to: start) else {
+            return (0, 0, 0, 0)
+        }
+        var remaining = max(0, end.timeIntervalSince(now))
+
+        let hh = Int(remaining / 3_600)
+        remaining -= Double(hh) * 3_600
+
+        let mi = Int(remaining / 60)
+        remaining -= Double(mi) * 60
+
+        let ss = Int(remaining)
+        remaining -= Double(ss)
+
+        let tenth = min(9, max(0, Int(remaining * 10)))
+        return (hh, mi, ss, tenth)
+    }
+
+    /// 今年剩餘月數（連續，含小數）。
+    public var monthsRemainingThisYear: Double {
+        max(0, (1 - progressOfCurrentYear) * 12)
+    }
+
+    /// 場記板完整讀數：yy.mm.dd.hh:mm:ss.s（人生 + 當日）
+    public var filmTimecodeString: String {
+        let d = lifeDateComponents
+        let t = todayTimeComponents
+        return String(
+            format: "%02d.%02d.%02d.%02d:%02d:%02d.%d",
+            d.years, d.months, d.days, t.hours, t.minutes, t.seconds, t.tenth
+        )
     }
 
     // MARK: - 字串
