@@ -10,15 +10,16 @@ struct OverviewView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-                heroCard
-                recentMomentsSection
-                Spacer(minLength: 0)
+            ScrollView {
+                VStack(spacing: 20) {
+                    heroCard
+                        .padding(.horizontal)
+
+                    recentMomentsSection
+                        .padding(.horizontal)
+                }
+                .padding(.vertical, 2)
             }
-            .padding(.horizontal)
-            .padding(.top, 8)
-            .padding(.bottom, 12)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .background(LifeTheme.subtleBackground.ignoresSafeArea())
             .navigationTitle("總覽")
             .navigationBarTitleDisplayMode(.inline)
@@ -30,14 +31,10 @@ struct OverviewView: View {
 
     var heroCard: some View {
         VStack(alignment: .leading, spacing: 16) {
-            TimelineView(.periodic(from: Date(), by: 0.1)) { ctx in
-                let metrics = LifeMetrics(
-                    birthday: store.birthday,
-                    lifeExpectancy: store.lifeExpectancy,
-                    now: ctx.date
-                )
-                LifeStopwatchRingsView(metrics: metrics)
-            }
+            LifeStopwatchRingsView(
+                birthday: store.birthday,
+                lifeExpectancy: store.lifeExpectancy
+            )
 
             Rectangle()
                 .fill(Color.white.opacity(0.08))

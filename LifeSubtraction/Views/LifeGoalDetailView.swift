@@ -18,6 +18,9 @@ struct LifeGoalDetailView: View {
     @State private var remindersEnabled = false
     @State private var calendarSyncEnabled = false
     @State private var isEditingStages = false
+    @State private var checkInMinutes = 60      // 修改内容 — 打卡輸入
+    @State private var checkInNote = ""         // 修改内容 — 打卡輸入
+    @State private var checkInStageId: UUID?    // 修改内容 — 目前展開打卡輸入的步驟
 
     private var goalIndex: Int? {
         goals.firstIndex { $0.id == goalId }
@@ -162,34 +165,153 @@ struct LifeGoalDetailView: View {
                 }
                 .cardStyle()
             } else {
+                // 修改内容 — 進度與執行紀錄整合：每個步驟可展開打卡（分鐘＋一句話），紀錄掛在步驟下
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("進度")
-                        .font(.headline)
-                        .foregroundStyle(LifeTheme.textPrimary)
+                    HStack {
+                        Text("進度")
+                            .font(.headline)
+                            .foregroundStyle(LifeTheme.textPrimary)
+                        Spacer()
+                        if goal.status == .active {
+                            Text(String(format: "本週 %.1f / %.1f 小時", Double(goal.minutesThisWeek) / 60, goal.effectiveWeeklyHours))
+                                .font(.caption.monospacedDigit())
+                                .foregroundStyle(LifeTheme.accent)
+                        }
+                    }
+
+                    if let progress = goal.timeProgress {
+                        VStack(alignment: .leading, spacing: 6) {
+                            ProgressView(value: progress)
+                                .tint(LifeTheme.accent)
+                            Text(String(format: "累積 %.1f / %d 小時", goal.loggedHours, goal.estimatedHours ?? 0))
+                                .font(.caption.monospacedDigit())
+                                .foregroundStyle(LifeTheme.textTertiary)
+                        }
+                    }
 
                     ForEach(goal.stages) { stage in
-                        Button {
-                            guard goals[index].status == .active else { return }
-                            goals[index].toggleStage(stage.id)
-                            saveGoals()
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: stage.isDone ? "checkmark.circle.fill" : "circle")
-                                    .foregroundStyle(stage.isDone ? LifeTheme.accent : LifeTheme.textTertiary)
-                                Text(stage.title)
-                                    .font(.subheadline)
-                                    .foregroundStyle(stage.isDone ? LifeTheme.textSecondary : LifeTheme.textPrimary)
-                                    .strikethrough(stage.isDone)
-                                Spacer()
-                            }
-                            .padding(.vertical, 8)
+                        stageRow(index: index, goal: goal, stage: stage)
+                    }
+
+                    let unassigned = goal.checkIns.filter { $0.stageId == nil }
+                    if !unassigned.isEmpty {
+                        Text("其他紀錄")
+                            .font(.caption)
+                            .foregroundStyle(LifeTheme.textTertiary)
+                        ForEach(unassigned) { record in
+                            checkInRow(record)
                         }
-                        .buttonStyle(.plain)
-                        .disabled(goals[index].status != .active)
                     }
                 }
                 .cardStyle()
             }
+        }
+    }
+
+    // 修改内容 — 單一步驟列：勾選＋打卡按鈕＋該步驟紀錄＋展開輸入
+    @ViewBuilder
+    func stageRow(index: Int, goal: LifeGoal, stage: GoalStage) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 12) {
+                Button {
+                    guard goals[index].status == .active else { return }
+                    goals[index].toggleStage(stage.id)
+                    saveGoals()
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: stage.isDone ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(stage.isDone ? LifeTheme.accent : LifeTheme.textTertiary)
+                        Text(stage.title)
+                            .font(.subheadline)
+                            .foregroundStyle(stage.isDone ? LifeTheme.textSecondary : LifeTheme.textPrimary)
+                            .strikethrough(stage.isDone)
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(.plain)
+                .disabled(goals[index].status != .active)
+
+                if goal.status == .active {
+                    Button {
+                        withAnimation(.snappy) {
+                            checkInStageId = (checkInStageId == stage.id) ? nil : stage.id
+                            checkInNote = ""
+                        }
+                    } label: {
+                        Image(systemName: checkInStageId == stage.id ? "square.and.pencil.circle.fill" : "square.and.pencil.circle")
+                            .font(.title3)
+                            .foregroundStyle(LifeTheme.accent)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            let records = goal.checkIns(for: stage.id)
+            if !records.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(records) { record in
+                        checkInRow(record)
+                    }
+                }
+                .padding(.leading, 32)
+            }
+
+            if checkInStageId == stage.id, goal.status == .active {
+                VStack(alignment: .leading, spacing: 10) {
+                    Stepper(value: $checkInMinutes, in: 5...480, step: 5) {
+                        Text("\(checkInMinutes) 分鐘")
+                            .font(.subheadline.monospacedDigit())
+                            .foregroundStyle(LifeTheme.textPrimary)
+                    }
+
+                    TextField("這次做了什麼？狀況如何？", text: $checkInNote, axis: .vertical)
+                        .lineLimit(1...3)
+                        .padding(10)
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.04)))
+                        .foregroundStyle(LifeTheme.textPrimary)
+
+                    Button {
+                        goals[index].addCheckIn(
+                            minutes: checkInMinutes,
+                            note: checkInNote.trimmingCharacters(in: .whitespacesAndNewlines),
+                            stageId: stage.id
+                        )
+                        checkInNote = ""
+                        withAnimation(.snappy) { checkInStageId = nil }
+                        saveGoals()
+                    } label: {
+                        Label("打卡", systemImage: "checkmark.circle.fill")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(RoundedRectangle(cornerRadius: 12).fill(LifeTheme.accent.opacity(0.18)))
+                            .foregroundStyle(LifeTheme.accent)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(12)
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
+                .padding(.leading, 32)
+            }
+        }
+    }
+
+    // 修改内容 — 單筆打卡紀錄列
+    func checkInRow(_ record: GoalCheckIn) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Text(formatDate(record.date))
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(LifeTheme.textTertiary)
+            Text("\(record.minutes) 分鐘")
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(LifeTheme.accent)
+            if !record.note.isEmpty {
+                Text(record.note)
+                    .font(.caption)
+                    .foregroundStyle(LifeTheme.textSecondary)
+            }
+            Spacer()
         }
     }
 
@@ -213,53 +335,59 @@ struct LifeGoalDetailView: View {
         .cardStyle()
     }
 
+    // 修改内容 — 時間規劃重構：任務總長/每週投入 stepper、預計完成推算、開始日期＋執行時間
     func timePlanningSection(index: Int, goal: LifeGoal) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text("時間規劃")
-                    .font(.headline)
-                    .foregroundStyle(LifeTheme.textPrimary)
-                Spacer()
-                Text("\(goals[index].timePlan.dailyMinutes) 分鐘")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(LifeTheme.accent)
-            }
+            Text("時間規劃")
+                .font(.headline)
+                .foregroundStyle(LifeTheme.textPrimary)
 
             HStack(spacing: 12) {
-                numericField(
+                hourStepper(
                     title: "任務總長",
-                    value: Binding(
-                        get: { goals[index].estimatedHours.map(String.init) ?? "" },
-                        set: { value in
-                            goals[index].estimatedHours = Int(value.filter(\.isNumber))
-                            saveGoalsAndSyncCalendar(index: index)
-                        }
-                    ),
-                    suffix: "小時"
+                    text: "\(goals[index].estimatedHours ?? 0) 小時",
+                    onDecrease: {
+                        goals[index].estimatedHours = max(1, (goals[index].estimatedHours ?? 1) - 1)
+                        saveGoalsAndSyncCalendar(index: index)
+                    },
+                    onIncrease: {
+                        goals[index].estimatedHours = min(2000, (goals[index].estimatedHours ?? 0) + 1)
+                        saveGoalsAndSyncCalendar(index: index)
+                    }
                 )
 
-                numericField(
+                hourStepper(
                     title: "每週投入",
-                    value: Binding(
-                        get: {
-                            guard let weeklyHours = goals[index].weeklyHours else { return "" }
-                            return String(format: "%.1f", weeklyHours)
-                        },
-                        set: { value in
-                            goals[index].weeklyHours = Double(value)
-                            saveGoalsAndSyncCalendar(index: index)
-                        }
-                    ),
-                    suffix: "小時"
+                    text: String(format: "%.1f 小時", goal.effectiveWeeklyHours),
+                    onDecrease: {
+                        goals[index].weeklyHours = max(0.5, goal.effectiveWeeklyHours - 0.5)
+                        saveGoalsAndSyncCalendar(index: index)
+                    },
+                    onIncrease: {
+                        goals[index].weeklyHours = min(80, goal.effectiveWeeklyHours + 0.5)
+                        saveGoalsAndSyncCalendar(index: index)
+                    }
                 )
+            }
+
+            if let weeks = goal.estimatedWeeks, let date = goal.estimatedCompletionDate {
+                HStack {
+                    Text("預計完成")
+                        .font(.caption)
+                        .foregroundStyle(LifeTheme.textTertiary)
+                    Spacer()
+                    Text("約 \(weeks) 週 · \(formatDate(date))")
+                        .font(.subheadline.monospacedDigit())
+                        .foregroundStyle(LifeTheme.accent)
+                }
             }
 
             DatePicker(
-                "當天日期",
+                "開始日期",
                 selection: Binding(
-                    get: { goals[index].timePlan.dailyDate },
+                    get: { goals[index].timePlan.startDate },
                     set: {
-                        goals[index].timePlan.dailyDate = $0
+                        goals[index].timePlan.startDate = $0
                         saveGoalsAndSyncCalendar(index: index)
                     }
                 ),
@@ -268,80 +396,40 @@ struct LifeGoalDetailView: View {
             .tint(LifeTheme.accent)
 
             DatePicker(
-                "開始時間",
+                "執行時間",
                 selection: Binding(
-                    get: { goals[index].timePlan.dailyStart },
+                    get: { goals[index].timePlan.execTime },
                     set: {
-                        goals[index].timePlan.dailyStart = $0
-                        if goals[index].timePlan.dailyEnd <= $0 {
-                            goals[index].timePlan.dailyEnd = $0.addingTimeInterval(3600)
-                        }
+                        goals[index].timePlan.execTime = $0
                         saveGoalsAndSyncCalendar(index: index)
                     }
                 ),
                 displayedComponents: .hourAndMinute
             )
             .tint(LifeTheme.accent)
-
-            DatePicker(
-                "結束時間",
-                selection: Binding(
-                    get: { goals[index].timePlan.dailyEnd },
-                    set: {
-                        goals[index].timePlan.dailyEnd = $0
-                        saveGoalsAndSyncCalendar(index: index)
-                    }
-                ),
-                displayedComponents: .hourAndMinute
-            )
-            .tint(LifeTheme.accent)
-
-            HStack(spacing: 12) {
-                decimalStepper(
-                    title: "本月規劃",
-                    value: Binding(
-                        get: { goals[index].timePlan.monthlyHours },
-                        set: {
-                            goals[index].timePlan.monthlyHours = $0
-                            saveGoalsAndSyncCalendar(index: index)
-                        }
-                    )
-                )
-
-                decimalStepper(
-                    title: "年度規劃",
-                    value: Binding(
-                        get: { goals[index].timePlan.yearlyHours },
-                        set: {
-                            goals[index].timePlan.yearlyHours = $0
-                            saveGoalsAndSyncCalendar(index: index)
-                        }
-                    )
-                )
-            }
 
             Toggle(isOn: $calendarSyncEnabled) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("同步到 Apple 日曆")
                         .font(.subheadline)
                         .foregroundStyle(LifeTheme.textPrimary)
-                    Text("依當天日期與開始 / 結束時間建立行程")
+                    Text("每週 \(goal.weeklySessionCount) 次、每次 1 小時，重複至預計完成日")
                         .font(.caption)
                         .foregroundStyle(LifeTheme.textTertiary)
                 }
             }
             .tint(LifeTheme.accent)
             .onAppear {
-                calendarSyncEnabled = goal.timePlan.calendarEventIdentifier != nil
+                calendarSyncEnabled = !goal.timePlan.calendarEventIdentifiers.isEmpty
             }
             .onChange(of: calendarSyncEnabled) { _, enabled in
                 Task {
                     if enabled {
-                        let id = await AppleCalendarManager.shared.syncGoal(goals[index])
-                        goals[index].timePlan.calendarEventIdentifier = id
+                        let ids = await AppleCalendarManager.shared.syncGoal(goals[index])
+                        goals[index].timePlan.calendarEventIdentifiers = ids
                     } else {
-                        AppleCalendarManager.shared.removeEvent(identifier: goals[index].timePlan.calendarEventIdentifier)
-                        goals[index].timePlan.calendarEventIdentifier = nil
+                        AppleCalendarManager.shared.removeEvents(identifiers: goals[index].timePlan.calendarEventIdentifiers)
+                        goals[index].timePlan.calendarEventIdentifiers = []
                     }
                     saveGoals()
                 }
@@ -350,35 +438,34 @@ struct LifeGoalDetailView: View {
         .cardStyle()
     }
 
-    func numericField(title: String, value: Binding<String>, suffix: String) -> some View {
+    // 修改内容 — − / ＋ 調整元件
+    func hourStepper(title: String, text: String, onDecrease: @escaping () -> Void, onIncrease: @escaping () -> Void) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.caption)
                 .foregroundStyle(LifeTheme.textTertiary)
-            HStack(spacing: 6) {
-                TextField("0", text: value)
-                    .keyboardType(.decimalPad)
-                    .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(LifeTheme.textPrimary)
-                Text(suffix)
-                    .font(.caption)
-                    .foregroundStyle(LifeTheme.textTertiary)
-            }
-            .padding(10)
-            .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.04)))
-        }
-    }
+            HStack(spacing: 0) {
+                Button(action: onDecrease) {
+                    Image(systemName: "minus")
+                        .frame(width: 32, height: 28)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(LifeTheme.accent)
 
-    func decimalStepper(title: String, value: Binding<Double>) -> some View {
-        Stepper(value: value, in: 0...2000, step: 1) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.caption)
-                    .foregroundStyle(LifeTheme.textTertiary)
-                Text(String(format: "%.0f 小時", value.wrappedValue))
+                Text(text)
                     .font(.subheadline.monospacedDigit())
                     .foregroundStyle(LifeTheme.textPrimary)
+                    .frame(maxWidth: .infinity)
+
+                Button(action: onIncrease) {
+                    Image(systemName: "plus")
+                        .frame(width: 32, height: 28)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(LifeTheme.accent)
             }
+            .padding(6)
+            .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.04)))
         }
     }
 
@@ -458,7 +545,7 @@ struct LifeGoalDetailView: View {
     func deleteGoal() {
         guard let index = goalIndex else { return }
         RemindersManager.shared.removeReminder(identifier: goals[index].reminderIdentifier)
-        AppleCalendarManager.shared.removeEvent(identifier: goals[index].timePlan.calendarEventIdentifier)
+        AppleCalendarManager.shared.removeEvents(identifiers: goals[index].timePlan.calendarEventIdentifiers) // 修改内容
         goals.remove(at: index)
         saveGoals()
         dismiss()
@@ -484,8 +571,8 @@ struct LifeGoalDetailView: View {
         saveGoals()
         guard calendarSyncEnabled, goals.indices.contains(index) else { return }
         Task {
-            let id = await AppleCalendarManager.shared.syncGoal(goals[index])
-            goals[index].timePlan.calendarEventIdentifier = id
+            let ids = await AppleCalendarManager.shared.syncGoal(goals[index]) // 修改内容
+            goals[index].timePlan.calendarEventIdentifiers = ids // 修改内容
             saveGoals()
         }
     }

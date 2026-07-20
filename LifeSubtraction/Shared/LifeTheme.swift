@@ -176,7 +176,7 @@ public struct PrimaryButton: View {
             .font(.headline)
             .foregroundStyle(Color.white)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(.vertical, 2)
             .background(
                 Capsule().fill(LifeTheme.heroGradient)
             )

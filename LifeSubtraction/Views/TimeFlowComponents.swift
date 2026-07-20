@@ -142,11 +142,15 @@ private struct StopwatchLegendItem: Identifiable {
 }
 
 struct LifeStopwatchRingsView: View {
-    let metrics: LifeMetrics
+    let birthday: Date
+    let lifeExpectancy: Int
+
+    @State private var introProgress: Double = 0
 
     private let dialSize: CGFloat = 290
     private var dialAssetSize: CGFloat { dialSize * StopwatchDialAsset.assetScale }
     private let frameSize: CGFloat = 330
+    private let introAnimation = Animation.easeOut(duration: 0.85)
 
     private struct RingSpec {
         let fraction: Double
@@ -158,11 +162,83 @@ struct LifeStopwatchRingsView: View {
         let useTimeGradient: Bool
     }
 
-    private var centerPercent: Int {
-        Int((metrics.lifeRemainingFraction * 100).rounded())
+    var body: some View {
+        TimelineView(.periodic(from: Date(), by: 0.1)) { ctx in
+            let metrics = LifeMetrics(
+                birthday: birthday,
+                lifeExpectancy: lifeExpectancy,
+                now: ctx.date
+            )
+            dialContent(metrics: metrics)
+        }
+        .onAppear {
+            introProgress = 0
+            withAnimation(introAnimation) {
+                introProgress = 1
+            }
+        }
     }
 
-    private var clockHandAngles: (hour: Double, minute: Double) {
+    @ViewBuilder
+    private func dialContent(metrics: LifeMetrics) -> some View {
+        VStack(spacing: 22) {
+            ZStack {
+                ForEach(legends(for: metrics)) { item in
+                    StopwatchCornerLegend(item: item)
+                        .frame(width: frameSize, height: frameSize, alignment: item.alignment)
+                }
+
+                ZStack {
+                    Image(StopwatchDialAsset.imageName)
+                        .resizable()
+                        .interpolation(.high)
+                        .antialiased(true)
+                        .frame(width: dialAssetSize, height: dialAssetSize)
+
+                    AgeLabelOverlay(
+                        dialSize: dialAssetSize,
+                        expectancy: metrics.lifeExpectancy
+                    )
+
+                    ForEach(Array(rings(for: metrics).enumerated()), id: \.offset) { _, spec in
+                        StopwatchRingLayer(
+                            fraction: min(1, max(0, spec.fraction * introProgress)),
+                            tickCount: spec.tickCount,
+                            radius: spec.radius,
+                            lineWidth: spec.lineWidth,
+                            palette: spec.palette,
+                            majorLabels: spec.majorLabels,
+                            useTimeGradient: spec.useTimeGradient,
+                            dialSize: dialAssetSize,
+                            showsTrack: false,
+                            showsTicks: false
+                        )
+                    }
+
+                    StopwatchMiniClockHands(
+                        hourAngle: clockHandAngles(for: metrics).hour,
+                        minuteAngle: clockHandAngles(for: metrics).minute,
+                        minRadius: centerHubRadius + 2,
+                        handBandLength: handBandLength(for: metrics)
+                    )
+                    .frame(width: dialAssetSize, height: dialAssetSize)
+
+                    centerPercentLabel(for: metrics)
+                }
+                .frame(width: dialAssetSize, height: dialAssetSize)
+            }
+            .frame(width: frameSize, height: frameSize)
+
+            timecodeBlock(metrics: metrics)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func centerPercent(for metrics: LifeMetrics) -> Int {
+        Int((metrics.lifeRemainingFraction * introProgress * 100).rounded())
+    }
+
+    private func clockHandAngles(for metrics: LifeMetrics) -> (hour: Double, minute: Double) {
         let cal = Calendar.current
         let h = cal.component(.hour, from: metrics.now)
         let m = cal.component(.minute, from: metrics.now)
@@ -174,16 +250,16 @@ struct LifeStopwatchRingsView: View {
 
     private let centerHubRadius: CGFloat = 40
 
-    private var innerRingInnerRadius: CGFloat {
-        guard let inner = rings.last else { return centerHubRadius + 30 }
+    private func handBandLength(for metrics: LifeMetrics) -> CGFloat {
+        max(12, innerRingInnerRadius(for: metrics) - centerHubRadius - 6)
+    }
+
+    private func innerRingInnerRadius(for metrics: LifeMetrics) -> CGFloat {
+        guard let inner = rings(for: metrics).last else { return centerHubRadius + 30 }
         return inner.radius - inner.lineWidth / 2
     }
 
-    private var handBandLength: CGFloat {
-        max(12, innerRingInnerRadius - centerHubRadius - 6)
-    }
-
-    private var rings: [RingSpec] {
+    private func rings(for metrics: LifeMetrics) -> [RingSpec] {
         let expectancy = max(1, metrics.lifeExpectancy)
         let ageLabels = [0, expectancy / 4, expectancy / 2, expectancy * 3 / 4]
 
@@ -209,13 +285,13 @@ struct LifeStopwatchRingsView: View {
         }
     }
 
-    private var legends: [StopwatchLegendItem] {
+    private func legends(for metrics: LifeMetrics) -> [StopwatchLegendItem] {
         [
             StopwatchLegendItem(
                 id: "year",
                 title: "人生",
                 subtitle: "(年)",
-                percent: centerPercent,
+                percent: centerPercent(for: metrics),
                 color: LifeTheme.ringLife,
                 alignment: .topLeading
             ),
@@ -223,7 +299,7 @@ struct LifeStopwatchRingsView: View {
                 id: "month",
                 title: "月",
                 subtitle: nil,
-                percent: Int((metrics.lifeMonthsRingFraction * 100).rounded()),
+                percent: Int((metrics.lifeMonthsRingFraction * introProgress * 100).rounded()),
                 color: LifeTheme.ringYear,
                 alignment: .topTrailing
             ),
@@ -231,7 +307,7 @@ struct LifeStopwatchRingsView: View {
                 id: "day",
                 title: "日",
                 subtitle: nil,
-                percent: Int((metrics.lifeDaysRingFraction * 100).rounded()),
+                percent: Int((metrics.lifeDaysRingFraction * introProgress * 100).rounded()),
                 color: LifeTheme.ringMonth,
                 alignment: .bottomLeading
             ),
@@ -239,69 +315,14 @@ struct LifeStopwatchRingsView: View {
                 id: "time",
                 title: "時間",
                 subtitle: nil,
-                percent: Int((metrics.todayHoursRingFraction * 100).rounded()),
+                percent: Int((metrics.todayHoursRingFraction * introProgress * 100).rounded()),
                 color: LifeTheme.ringDay,
                 alignment: .bottomTrailing
             ),
         ]
     }
 
-    var body: some View {
-        VStack(spacing: 22) {
-            ZStack {
-                ForEach(legends) { item in
-                    StopwatchCornerLegend(item: item)
-                        .frame(width: frameSize, height: frameSize, alignment: item.alignment)
-                }
-
-                ZStack {
-                    Image(StopwatchDialAsset.imageName)
-                        .resizable()
-                        .interpolation(.high)
-                        .antialiased(true)
-                        .frame(width: dialAssetSize, height: dialAssetSize)
-
-                    AgeLabelOverlay(
-                        dialSize: dialAssetSize,
-                        expectancy: metrics.lifeExpectancy
-                    )
-
-                    ForEach(Array(rings.enumerated()), id: \.offset) { _, spec in
-                        StopwatchRingLayer(
-                            fraction: spec.fraction,
-                            tickCount: spec.tickCount,
-                            radius: spec.radius,
-                            lineWidth: spec.lineWidth,
-                            palette: spec.palette,
-                            majorLabels: spec.majorLabels,
-                            useTimeGradient: spec.useTimeGradient,
-                            dialSize: dialAssetSize,
-                            useRoundCap: true,
-                            showsTrack: false,
-                            showsTicks: false
-                        )
-                    }
-
-                    StopwatchMiniClockHands(
-                        hourAngle: clockHandAngles.hour,
-                        minuteAngle: clockHandAngles.minute,
-                        minRadius: centerHubRadius + 2,
-                        handBandLength: handBandLength
-                    )
-                    .frame(width: dialAssetSize, height: dialAssetSize)
-
-                    centerPercentLabel
-                }
-                .frame(width: dialAssetSize, height: dialAssetSize)
-            }
-            .frame(width: frameSize, height: frameSize)
-
-            timecodeBlock
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var timecodeBlock: some View {
+    private func timecodeBlock(metrics: LifeMetrics) -> some View {
         let d = metrics.lifeDateComponents
         let t = metrics.todayTimeComponents
         return VStack(spacing: 12) {
@@ -323,7 +344,7 @@ struct LifeStopwatchRingsView: View {
     }
 
     private enum TimecodeStyle {
-        static let digitFont = Font.system(size: 28, weight: .bold, design: .monospaced)
+        static let digitFont = Font.system(size: 42, weight: .bold, design: .monospaced)
         static let unitFont = Font.system(size: 10, weight: .medium)
     }
 
@@ -353,17 +374,18 @@ struct LifeStopwatchRingsView: View {
 
     private var timecodeUnitRow: some View {
         HStack(spacing: 0) {
-            timecodeUnitLabel("年", width: 34)
+            timecodeUnitLabel("年", width: 40)
+            timecodeUnitSpacer(width: 12)
+            timecodeUnitLabel("月", width: 40)
+            timecodeUnitSpacer(width: 12)
+            timecodeUnitLabel("日", width: 40)
+            timecodeUnitSpacer(width: 15)
+            timecodeUnitLabel("時", width: 36)
             timecodeUnitSpacer(width: 10)
-            timecodeUnitLabel("月", width: 34)
+            timecodeUnitLabel("分", width: 36)
             timecodeUnitSpacer(width: 10)
-            timecodeUnitLabel("日", width: 34)
-            timecodeUnitSpacer(width: 10)
-            timecodeUnitLabel("時", width: 28)
-            timecodeUnitSpacer(width: 6)
-            timecodeUnitLabel("分", width: 28)
-            timecodeUnitSpacer(width: 6)
             timecodeUnitLabel("秒", width: 36)
+            timecodeUnitSpacer(width: 36)
         }
         .font(TimecodeStyle.unitFont)
         .foregroundStyle(LifeTheme.textQuaternary)
@@ -378,12 +400,13 @@ struct LifeStopwatchRingsView: View {
         Color.clear.frame(width: width, height: 1)
     }
 
-    private var centerPercentLabel: some View {
-        Text("\(centerPercent)%")
+    private func centerPercentLabel(for metrics: LifeMetrics) -> some View {
+        Text("\(centerPercent(for: metrics))%")
             .font(.system(size: 38, weight: .medium, design: .rounded))
             .foregroundStyle(LifeTheme.textPrimary)
             .monospacedDigit()
             .contentTransition(.numericText(countsDown: true))
+            .animation(introAnimation, value: introProgress)
     }
 }
 
@@ -531,7 +554,6 @@ private struct StopwatchRingLayer: View {
     let majorLabels: [Int]?
     let useTimeGradient: Bool
     let dialSize: CGFloat
-    var useRoundCap: Bool = false
     var showsTrack: Bool = true
     var showsTicks: Bool = true
 
@@ -567,13 +589,12 @@ private struct StopwatchRingLayer: View {
                 progressStrokeStyle,
                 style: StrokeStyle(
                     lineWidth: lineWidth,
-                    lineCap: useRoundCap ? .round : .butt,
+                    lineCap: .butt,
                     lineJoin: .miter
                 )
             )
             .rotationEffect(.degrees(-90))
             .shadow(color: palette.active.opacity(0.22), radius: 2)
-            .animation(.easeInOut(duration: 0.6), value: fraction)
     }
 
     private var progressStrokeStyle: AnyShapeStyle {

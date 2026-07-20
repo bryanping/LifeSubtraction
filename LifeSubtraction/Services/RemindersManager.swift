@@ -94,40 +94,48 @@ final class AppleCalendarManager {
         }
     }
 
-    func syncGoal(_ goal: LifeGoal) async -> String? {
-        guard await requestAccess() else { return nil }
+    // 修改内容 — 每週 N 次、每次固定 1 小時、每週重複至預計完成日
+    func syncGoal(_ goal: LifeGoal) async -> [String] {
+        guard await requestAccess() else { return [] }
+
+        removeEvents(identifiers: goal.timePlan.calendarEventIdentifiers)
+
         let calendar = store.defaultCalendarForNewEvents
-        let event: EKEvent
+        let cal = Calendar.current
+        let sessions = goal.weeklySessionCount
+        let firstStart = combinedDate(day: goal.timePlan.startDate, time: goal.timePlan.execTime)
+        var recurrenceEnd: EKRecurrenceEnd?
+        if let completion = goal.estimatedCompletionDate {
+            recurrenceEnd = EKRecurrenceEnd(end: completion)
+        }
 
-        if let existingId = goal.timePlan.calendarEventIdentifier,
-           let existing = store.event(withIdentifier: existingId) {
-            event = existing
-        } else {
-            event = EKEvent(eventStore: store)
+        var identifiers: [String] = []
+        for i in 0..<sessions {
+            // 平均分散在一週內（例：2 次 → 間隔約 3~4 天）
+            let dayOffset = Int((Double(i) * 7 / Double(sessions)).rounded())
+            guard let start = cal.date(byAdding: .day, value: dayOffset, to: firstStart) else { continue }
+
+            let event = EKEvent(eventStore: store)
             event.calendar = calendar
-        }
+            event.title = goal.displayTitle
+            event.notes = calendarNotes(for: goal)
+            event.startDate = start
+            event.endDate = start.addingTimeInterval(3600) // 固定 1 小時
+            event.recurrenceRules = [EKRecurrenceRule(recurrenceWith: .weekly, interval: 1, end: recurrenceEnd)]
 
-        event.title = goal.displayTitle
-        event.notes = calendarNotes(for: goal)
-        event.startDate = combinedDate(day: goal.timePlan.dailyDate, time: goal.timePlan.dailyStart)
-        event.endDate = max(
-            combinedDate(day: goal.timePlan.dailyDate, time: goal.timePlan.dailyEnd),
-            event.startDate.addingTimeInterval(15 * 60)
-        )
-
-        do {
-            try store.save(event, span: .thisEvent, commit: true)
-            return event.eventIdentifier
-        } catch {
-            return nil
+            if (try? store.save(event, span: .futureEvents, commit: true)) != nil {
+                identifiers.append(event.eventIdentifier)
+            }
         }
+        return identifiers
     }
 
-    func removeEvent(identifier: String?) {
-        guard let identifier,
-              let event = store.event(withIdentifier: identifier)
-        else { return }
-        try? store.remove(event, span: .thisEvent, commit: true)
+    // 修改内容 — 移除多筆行程（含重複）
+    func removeEvents(identifiers: [String]) {
+        for identifier in identifiers {
+            guard let event = store.event(withIdentifier: identifier) else { continue }
+            try? store.remove(event, span: .futureEvents, commit: true)
+        }
     }
 
     private func combinedDate(day: Date, time: Date) -> Date {
@@ -148,11 +156,13 @@ final class AppleCalendarManager {
         if let estimatedHours = goal.estimatedHours {
             lines.append("預估總長：\(estimatedHours) 小時")
         }
-        if let weeklyHours = goal.weeklyHours {
-            lines.append(String(format: "每週投入：%.1f 小時", weeklyHours))
+        lines.append(String(format: "每週投入：%.1f 小時（每週 %d 次、每次 1 小時）", goal.effectiveWeeklyHours, goal.weeklySessionCount)) // 修改内容
+        if let date = goal.estimatedCompletionDate { // 修改内容
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "zh_TW")
+            formatter.dateFormat = "yyyy/MM/dd"
+            lines.append("預計完成：\(formatter.string(from: date))")
         }
-        lines.append(String(format: "本月規劃：%.1f 小時", goal.timePlan.monthlyHours))
-        lines.append(String(format: "年度規劃：%.1f 小時", goal.timePlan.yearlyHours))
         if !goal.notes.isEmpty {
             lines.append("")
             lines.append(goal.notes)

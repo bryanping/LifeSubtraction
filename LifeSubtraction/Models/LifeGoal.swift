@@ -82,40 +82,67 @@ struct GoalStage: Identifiable, Codable, Hashable {
     }
 }
 
+// 修改内容 — 時間規劃精簡：開始日期＋執行時間，刪除結束時間/本月/年度；日曆行程改多筆（每週 N 次、每次 1 小時）
 struct GoalTimePlan: Codable, Hashable {
-    var dailyDate: Date
-    var dailyStart: Date
-    var dailyEnd: Date
-    var monthlyHours: Double
-    var yearlyHours: Double
-    var calendarEventIdentifier: String?
+    var startDate: Date              // 修改内容：原 dailyDate → 開始日期
+    var execTime: Date               // 修改内容：原 dailyStart → 執行時間
+    var calendarEventIdentifiers: [String]  // 修改内容：原單一 identifier → 多筆
 
     init(
-        dailyDate: Date = Date(),
-        dailyStart: Date = GoalTimePlan.defaultStart(),
-        dailyEnd: Date = GoalTimePlan.defaultEnd(),
-        monthlyHours: Double = 8,
-        yearlyHours: Double = 96,
-        calendarEventIdentifier: String? = nil
+        startDate: Date = Date(),
+        execTime: Date = GoalTimePlan.defaultExecTime(),
+        calendarEventIdentifiers: [String] = []
     ) {
-        self.dailyDate = dailyDate
-        self.dailyStart = dailyStart
-        self.dailyEnd = dailyEnd
-        self.monthlyHours = monthlyHours
-        self.yearlyHours = yearlyHours
-        self.calendarEventIdentifier = calendarEventIdentifier
+        self.startDate = startDate
+        self.execTime = execTime
+        self.calendarEventIdentifiers = calendarEventIdentifiers
     }
 
-    var dailyMinutes: Int {
-        max(15, Int(dailyEnd.timeIntervalSince(dailyStart) / 60))
-    }
-
-    static func defaultStart() -> Date {
+    static func defaultExecTime() -> Date {
         Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: Date()) ?? Date()
     }
 
-    static func defaultEnd() -> Date {
-        Calendar.current.date(bySettingHour: 21, minute: 0, second: 0, of: Date()) ?? Date().addingTimeInterval(3600)
+    // 修改内容 — 舊資料相容（dailyDate/dailyStart/calendarEventIdentifier）
+    enum CodingKeys: String, CodingKey {
+        case startDate, execTime, calendarEventIdentifiers
+        case dailyDate, dailyStart, calendarEventIdentifier
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        startDate = try c.decodeIfPresent(Date.self, forKey: .startDate)
+            ?? c.decodeIfPresent(Date.self, forKey: .dailyDate)
+            ?? Date()
+        execTime = try c.decodeIfPresent(Date.self, forKey: .execTime)
+            ?? c.decodeIfPresent(Date.self, forKey: .dailyStart)
+            ?? GoalTimePlan.defaultExecTime()
+        calendarEventIdentifiers = try c.decodeIfPresent([String].self, forKey: .calendarEventIdentifiers)
+            ?? c.decodeIfPresent(String.self, forKey: .calendarEventIdentifier).map { [$0] }
+            ?? []
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(startDate, forKey: .startDate)
+        try c.encode(execTime, forKey: .execTime)
+        try c.encode(calendarEventIdentifiers, forKey: .calendarEventIdentifiers)
+    }
+}
+
+// 修改内容 — 打卡紀錄：實際投入時間＋執行狀況
+struct GoalCheckIn: Identifiable, Codable, Hashable {
+    var id: UUID
+    var date: Date
+    var minutes: Int
+    var note: String
+    var stageId: UUID? // 修改内容 — 綁定進度步驟
+
+    init(id: UUID = UUID(), date: Date = Date(), minutes: Int = 60, note: String = "", stageId: UUID? = nil) {
+        self.id = id
+        self.date = date
+        self.minutes = minutes
+        self.note = note
+        self.stageId = stageId
     }
 }
 
@@ -141,6 +168,7 @@ struct LifeGoal: Identifiable, Codable, Hashable {
     var estimatedHours: Int?
     var weeklyHours: Double?
     var timePlan: GoalTimePlan
+    var checkIns: [GoalCheckIn] // 修改内容 — 打卡紀錄
 
     init(
         id: UUID = UUID(),
@@ -159,8 +187,9 @@ struct LifeGoal: Identifiable, Codable, Hashable {
         extensionCount: Int = 0,
         createdAt: Date = Date(),
         estimatedHours: Int? = nil,
-        weeklyHours: Double? = nil,
-        timePlan: GoalTimePlan = GoalTimePlan()
+        weeklyHours: Double? = 2, // 修改内容 — 每週投入預設 2 小時
+        timePlan: GoalTimePlan = GoalTimePlan(),
+        checkIns: [GoalCheckIn] = [] // 修改内容
     ) {
         self.id = id
         self.title = title
@@ -178,8 +207,69 @@ struct LifeGoal: Identifiable, Codable, Hashable {
         self.extensionCount = extensionCount
         self.createdAt = createdAt
         self.estimatedHours = estimatedHours
+            ?? catalogId.flatMap { GoalCatalog.entry(id: $0)?.estimatedHours } // 修改内容 — 建立時自動預帶 catalog 預估
         self.weeklyHours = weeklyHours
         self.timePlan = timePlan
+        self.checkIns = checkIns // 修改内容
+    }
+
+    // MARK: - 修改内容 — 時間規劃推算
+
+    /// 每週投入（含預設 2 小時下限保護）
+    var effectiveWeeklyHours: Double {
+        max(0.5, weeklyHours ?? 2)
+    }
+
+    /// 每週執行次數（每次固定 1 小時）
+    var weeklySessionCount: Int {
+        max(1, Int(effectiveWeeklyHours.rounded(.up)))
+    }
+
+    /// 累積打卡分鐘數
+    var loggedMinutes: Int {
+        checkIns.reduce(0) { $0 + $1.minutes }
+    }
+
+    var loggedHours: Double {
+        Double(loggedMinutes) / 60
+    }
+
+    /// 時間進度 0...1（以打卡累積 ÷ 任務總長）
+    var timeProgress: Double? {
+        guard let estimatedHours, estimatedHours > 0 else { return nil }
+        return min(1, loggedHours / Double(estimatedHours))
+    }
+
+    /// 本週已打卡分鐘數
+    var minutesThisWeek: Int {
+        let cal = Calendar.current
+        return checkIns
+            .filter { cal.isDate($0.date, equalTo: Date(), toGranularity: .weekOfYear) }
+            .reduce(0) { $0 + $1.minutes }
+    }
+
+    /// 預計需要的週數
+    var estimatedWeeks: Int? {
+        guard let estimatedHours, estimatedHours > 0 else { return nil }
+        let remaining = max(0, Double(estimatedHours) - loggedHours)
+        return max(1, Int((remaining / effectiveWeeklyHours).rounded(.up)))
+    }
+
+    /// 預計完成日（依剩餘時數 ÷ 每週投入，從今天或開始日期往後推）
+    var estimatedCompletionDate: Date? {
+        guard let weeks = estimatedWeeks else { return nil }
+        let anchor = max(timePlan.startDate, Calendar.current.startOfDay(for: Date()))
+        return Calendar.current.date(byAdding: .weekOfYear, value: weeks, to: anchor)
+    }
+
+    mutating func addCheckIn(minutes: Int, note: String, stageId: UUID? = nil) { // 修改内容 — 可綁定步驟
+        checkIns.insert(GoalCheckIn(minutes: minutes, note: note, stageId: stageId), at: 0)
+        if startDate == nil { startDate = Date() }
+    }
+
+    /// 指定步驟的打卡紀錄（新→舊）修改内容
+    func checkIns(for stageId: UUID) -> [GoalCheckIn] {
+        checkIns.filter { $0.stageId == stageId }
     }
 
     var isDueDateLocked: Bool {
@@ -216,7 +306,7 @@ struct LifeGoal: Identifiable, Codable, Hashable {
     enum CodingKeys: String, CodingKey {
         case id, title, category, startDate, completedDate, notes, status, stages
         case reminderIdentifier, catalogId, detailSelections, dueDate, originalDueDate, extensionCount, createdAt
-        case estimatedHours, weeklyHours, timePlan // 修改内容
+        case estimatedHours, weeklyHours, timePlan, checkIns // 修改内容
     }
 
     init(from decoder: Decoder) throws {
@@ -238,8 +328,10 @@ struct LifeGoal: Identifiable, Codable, Hashable {
         extensionCount = try container.decodeIfPresent(Int.self, forKey: .extensionCount) ?? 0
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
         estimatedHours = try container.decodeIfPresent(Int.self, forKey: .estimatedHours)
-        weeklyHours = try container.decodeIfPresent(Double.self, forKey: .weeklyHours)
+            ?? catalogId.flatMap { GoalCatalog.entry(id: $0)?.estimatedHours } // 修改内容 — 舊資料補上預估
+        weeklyHours = try container.decodeIfPresent(Double.self, forKey: .weeklyHours) ?? 2 // 修改内容
         timePlan = try container.decodeIfPresent(GoalTimePlan.self, forKey: .timePlan) ?? GoalTimePlan()
+        checkIns = try container.decodeIfPresent([GoalCheckIn].self, forKey: .checkIns) ?? [] // 修改内容
     }
 
     func encode(to encoder: Encoder) throws {
@@ -262,6 +354,7 @@ struct LifeGoal: Identifiable, Codable, Hashable {
         try container.encodeIfPresent(estimatedHours, forKey: .estimatedHours)
         try container.encodeIfPresent(weeklyHours, forKey: .weeklyHours)
         try container.encode(timePlan, forKey: .timePlan)
+        try container.encode(checkIns, forKey: .checkIns) // 修改内容
     }
 
     var completedStageCount: Int { stages.filter(\.isDone).count }

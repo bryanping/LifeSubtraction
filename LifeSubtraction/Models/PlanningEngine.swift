@@ -117,7 +117,7 @@ enum PlanningEngine {
                     date: due,
                     timeLabel: days < 0 ? "已超過 \(abs(days)) 天" : "距今 \(days) 天",
                     kind: .goalDue,
-                    subtitle: goalSubtitle(goal, budgetHours: goal.timePlan.yearlyHours),
+                    subtitle: goalSubtitle(goal, budgetHours: Double(goal.estimatedHours ?? 0)), // 修改内容
                     goalId: goal.id,
                     taskId: nil
                 ))
@@ -130,7 +130,7 @@ enum PlanningEngine {
                     date: goal.createdAt,
                     timeLabel: "長期進行中",
                     kind: .goalDue,
-                    subtitle: goalSubtitle(goal, budgetHours: goal.timePlan.yearlyHours),
+                    subtitle: goalSubtitle(goal, budgetHours: Double(goal.estimatedHours ?? 0)), // 修改内容
                     goalId: goal.id,
                     taskId: nil
                 ))
@@ -173,7 +173,7 @@ enum PlanningEngine {
                     date: due,
                     timeLabel: days < 0 ? "已超過 \(abs(days)) 天" : (days == 0 ? "本月到期" : "距今 \(days) 天"),
                     kind: .goalDue,
-                    subtitle: goalSubtitle(goal, budgetHours: goal.timePlan.monthlyHours),
+                    subtitle: goalSubtitle(goal, budgetHours: goal.effectiveWeeklyHours * 4), // 修改内容 — 以每週投入推月時數
                     goalId: goal.id,
                     taskId: nil
                 ))
@@ -198,8 +198,8 @@ enum PlanningEngine {
         // 今天有每日排程時段的進行中目標。若同一個目標今天剛好到期，合併成同一列，避免重複出現。
         for goal in goals where goal.status == .active {
             let plan = goal.timePlan
-            let startHour = cal.component(.hour, from: plan.dailyStart)
-            let endHour = max(startHour + 1, cal.component(.hour, from: plan.dailyEnd))
+            let startHour = cal.component(.hour, from: plan.execTime) // 修改内容
+            let endHour = min(24, startHour + 1) // 修改内容 — 每次固定 1 小時
             let dueToday = goal.dueDate.map { cal.isDate($0, inSameDayAs: anchorDate) } ?? false
 
             result.append(PlanningItem(
@@ -250,8 +250,8 @@ enum PlanningEngine {
 
         for goal in goals where goal.status == .active {
             let plan = goal.timePlan
-            let startHour = max(0, cal.component(.hour, from: plan.dailyStart))
-            let endHour = min(24, max(startHour + 1, cal.component(.hour, from: plan.dailyEnd)))
+            let startHour = max(0, cal.component(.hour, from: plan.execTime)) // 修改内容
+            let endHour = min(24, startHour + 1) // 修改内容 — 每次固定 1 小時
             guard startHour < endHour else { continue }
             for h in startHour..<endHour { occupied[h] = true }
         }
@@ -323,12 +323,15 @@ enum PlanningEngine {
         let currentMonth = cal.component(.month, from: anchorDate)
         let remainingMonths = (currentMonth...12).filter { !occupiedMonths.contains($0) }
         guard !remainingMonths.isEmpty else { return [] }
-        let picked = spaced(remainingMonths, desiredCount: min(5, remainingMonths.count))
         let candidates = recommendationCandidates(goals: goals, tasks: tasks)
         guard !candidates.isEmpty else { return [] }
+        let picked = spaced(
+            remainingMonths,
+            desiredCount: min(5, remainingMonths.count, candidates.count)
+        )
 
         return picked.enumerated().map { index, month in
-            let content = candidates[index % candidates.count]
+            let content = candidates[index]
             return PlanningRecommendation(
                 id: "month-rec-\(month)",
                 dateLabel: "\(month) 月",
@@ -352,12 +355,15 @@ enum PlanningEngine {
         guard let range = cal.range(of: .day, in: .month, for: anchorDate) else { return [] }
         let remainingDays = (today...range.upperBound - 1).filter { !occupiedDays.contains($0) }
         guard !remainingDays.isEmpty else { return [] }
-        let picked = spaced(remainingDays, desiredCount: min(5, remainingDays.count))
         let candidates = recommendationCandidates(goals: goals, tasks: tasks)
         guard !candidates.isEmpty else { return [] }
+        let picked = spaced(
+            remainingDays,
+            desiredCount: min(5, remainingDays.count, candidates.count)
+        )
 
         return picked.enumerated().map { index, day in
-            let content = candidates[index % candidates.count]
+            let content = candidates[index]
             return PlanningRecommendation(
                 id: "day-rec-\(day)",
                 dateLabel: "\(day) 日",
@@ -403,8 +409,22 @@ enum PlanningEngine {
         }
 
         let merged = interleave(goalCandidates, taskCandidates)
-        if !merged.isEmpty { return merged }
+        if !merged.isEmpty { return uniqueCandidates(merged) }
         return genericPrompts
+    }
+
+    private static func uniqueCandidates(_ candidates: [RecommendationCandidate]) -> [RecommendationCandidate] {
+        var usedKeys = Set<String>()
+        return candidates.filter { candidate in
+            let key = candidate.goalId?.uuidString ?? normalize(candidate.title)
+            guard !usedKeys.contains(key) else { return false }
+            usedKeys.insert(key)
+            return true
+        }
+    }
+
+    private static func normalize(_ value: String) -> String {
+        value.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 
     private static func interleave<T>(_ a: [T], _ b: [T]) -> [T] {

@@ -63,7 +63,7 @@ struct TaskListView: View {
 
                     Spacer(minLength: 20)
                 }
-                .padding(.vertical, 16)
+                .padding(.vertical, 2)
             }
             .background(LifeTheme.subtleBackground.ignoresSafeArea())
             .navigationTitle("清單")

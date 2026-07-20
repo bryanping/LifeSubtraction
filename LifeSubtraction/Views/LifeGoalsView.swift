@@ -27,7 +27,7 @@ struct LifeGoalsView: View {
                     }
                 }
                 .padding(.horizontal)
-                .padding(.vertical, 16)
+                .padding(.vertical, 2)
             }
             .background(LifeTheme.subtleBackground.ignoresSafeArea())
             .navigationTitle("規劃")
